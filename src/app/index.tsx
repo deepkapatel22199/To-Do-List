@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 import { View, Text, ActivityIndicator, Image , TouchableOpacity} from 'react-native';
 
 export default function Index() {
@@ -8,7 +10,7 @@ export default function Index() {
   useEffect(() => {
     setTimeout(() => {
       setShowSplash(false);
-    }, 3000);
+    }, 2000);
   }, []);
 
   if (showSplash) {
@@ -66,17 +68,74 @@ export default function Index() {
     );
   }
   return (
-    <View
+    <View 
       style={{
         flex: 1,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#F7F9FC',
       }}
     >
-      <Text style={{ fontSize: 28, fontWeight: 'bold' }}>
-        My To-Do App
-      </Text>
+      <View
+        style={{
+          backgroundColor: '#208AEF',
+          paddingTop: 70,
+          paddingBottom: 5,
+          paddingHorizontal: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 32,
+            fontWeight: 'bold',
+            color:'white',
+          }}
+        >
+          My Tasks
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 16,
+            color: 'white',
+            marginBottom: 10,
+          }}
+        >
+          Organize your day with simple tasks
+        </Text>
+      </View> 
+
+     <View
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          left: 20,
+          right: 20,
+          height: 70,
+          borderRadius: 25,
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+        }}
+      >
+
+        <FontAwesome name="home" size={24} color="#2F73F6" />
+        
+        <TouchableOpacity
+          onPress={() => router.push('/addTask')}
+          style={{
+            backgroundColor: '#2F73F6',
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+            <FontAwesome name="plus" size={24} color="white" />
+        </TouchableOpacity>
+
+        <FontAwesome name="search" size={24} color="#2F73F6" />
+      </View>
     </View>
   );
 }
