@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { Image } from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity} from 'react-native';
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   useEffect(() => {
     setTimeout(() => {
@@ -22,13 +22,13 @@ export default function Index() {
         }}
       >
         <Image
-    source={require('../../assets/images/splash-icon.png')}
-    style={{
-      width: 150,
-      height: 150,
-      marginBottom: 20,
-    }}
-  />
+          source={require('../../assets/images/splash-icon.png')}
+          style={{
+            width: 150,
+            height: 150,
+            marginBottom: 20,
+          }}
+        />
         <Text style={{ fontSize: 36, fontWeight: 'bold', color: 'white' }}>
           To Do List 
         </Text>
@@ -40,6 +40,31 @@ export default function Index() {
     );
   }
 
+  if (showOnboarding) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <Image
+          source={require('../../assets/images/splash-icon.png')}
+          style={{ width: 160, height: 160, marginBottom: 30 }}
+        />
+
+        <Text style={{ fontSize: 30, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
+          Manage Your Tasks Easily
+        </Text>
+
+        <Text style={{ fontSize: 16, textAlign: 'center', color: '#666', marginBottom: 40 }}>
+          Add, edit, complete, and organize your daily tasks in one simple app.
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => setShowOnboarding(false)}
+          style={{ backgroundColor: '#208AEF', paddingVertical: 15, paddingHorizontal: 50, borderRadius: 12 }}
+        >
+          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Get Started</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   return (
     <View
       style={{
