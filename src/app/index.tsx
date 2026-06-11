@@ -1,11 +1,34 @@
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
+import { useEffect, useState, useCallback} from 'react';
+import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { View, Text, ActivityIndicator, Image , TouchableOpacity} from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type Task = {
+  id: string;
+  title: string;
+  description: string;
+  priority: string;
+  dueDate: string;
+  completed: boolean;
+};
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const loadTasks = async () => {
+  const savedTasks = await AsyncStorage.getItem('tasks');
+  setTasks(savedTasks ? JSON.parse(savedTasks) : []);
+};
+
+useFocusEffect(
+  useCallback(() => {
+    loadTasks();
+  }, [])
+);
 
   useEffect(() => {
     setTimeout(() => {
@@ -102,6 +125,7 @@ export default function Index() {
           Organize your day with simple tasks
         </Text>
       </View> 
+      {tasks.length === 0 ? (
       <View
         style={{
           flexDirection:'column',
@@ -126,7 +150,58 @@ export default function Index() {
           You don't have any tasks
         </Text>
       </View> 
+      ) : (
+  <FlatList
+    data={tasks}
+    keyExtractor={(item) => item.id}
+    contentContainerStyle={{
+      padding: 20,
+      paddingBottom: 120,
+    }}
+    renderItem={({ item }) => (
+      <View
+        style={{
+          backgroundColor: 'white',
+          padding: 16,
+          borderRadius: 12,
+          marginBottom: 12,
+          borderWidth: 1,
+          borderColor: '#ddd',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+          }}
+        >
+          {item.title}
+        </Text>
 
+        <Text
+          style={{
+            color: '#666',
+            marginTop: 5,
+          }}
+        >
+          {item.description}
+        </Text>
+
+        <Text
+          style={{
+            marginTop: 8,
+          }}
+        >
+          Priority: {item.priority}
+        </Text>
+
+        <Text>
+          Due: {item.dueDate}
+        </Text>
+      </View>
+    )}
+  />
+)}
      <View
         style={{
           position: 'absolute',

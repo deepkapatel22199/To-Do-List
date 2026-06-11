@@ -1,12 +1,16 @@
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
-import {useState, useRef} from  'react';
+import {useState } from  'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type TaskItem = {
+type Task = {
   id: string;
-  text: string;
+  title: string;
+  description: string;
+  priority: string;
+  dueDate: Date;
   completed: boolean;
 };
 
@@ -14,31 +18,32 @@ export default function AddTask() {
   const [priority, setPriority] = useState('Medium');
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [itemText, setItemText] = useState('');
-  const [items, setItems] = useState<TaskItem[]>([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  
 
-  const inputRef = useRef<TextInput>(null);
+  const handleAddTask = async () => {
+  if (title.trim() === '') {
+    alert('Please enter task title');
+    return;
+  }
 
-   const addItem = () => {
-    if (itemText.trim() === '') return;
-
-    const newItem: TaskItem = {
-      id: Date.now().toString(),
-      text: itemText.trim(),
-      completed: false,
-    };
-
-    setItems([...items, newItem]);
-    setItemText('');
+  const newTask: Task = {
+    id: Date.now().toString(),
+    title: title.trim(),
+    description: description.trim(),
+    priority,
+    dueDate: dueDate,
+    completed: false,
   };
 
-  const toggleItem = (id: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
-  };
+  const savedTasks = await AsyncStorage.getItem('tasks');
+  const oldTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
+
+  await AsyncStorage.setItem('tasks', JSON.stringify([...oldTasks, newTask]));
+
+  router.back();
+};
 
 
   return (
@@ -96,6 +101,8 @@ export default function AddTask() {
       >
         <TextInput
         placeholder="Task Title"
+        value={title}
+        onChangeText={setTitle}
         style={{
           backgroundColor: 'white',
           borderRadius: 12,
@@ -108,6 +115,8 @@ export default function AddTask() {
 
       <TextInput
         placeholder="Task Description"
+        value={description}
+        onChangeText={setDescription}
         multiline
         style={{
           backgroundColor: 'white',
@@ -212,6 +221,7 @@ export default function AddTask() {
 )}
 
       <TouchableOpacity
+        onPress={handleAddTask}
         style={{
           backgroundColor: '#208AEF',
           padding: 16,
