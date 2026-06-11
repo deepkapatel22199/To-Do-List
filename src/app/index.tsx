@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { useTheme } from './context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type Task = {
   id: string;
@@ -150,67 +151,194 @@ useFocusEffect(
   <View
     style={{
       backgroundColor: theme.card,
-      padding: 16,
-      borderRadius: 12,
-      marginBottom: 12,
+      padding: 18,
+      borderRadius: 18,
+      marginBottom: 16,
       borderWidth: 1,
-      borderColor: '#ddd',
+      borderColor: isDarkMode ? '#444' : '#ccc',
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
     }}
   >
     <Text
       style={{
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         color: theme.text,
         textDecorationLine: item.completed ? 'line-through' : 'none',
-        opacity: item.completed ? 0.5 : 1,
+        opacity: item.completed ? 0.55 : 1,
       }}
     >
       {item.title}
     </Text>
-
-    <Text style={{ color: theme.subText, marginTop: 5 }}>
-      {item.description}
+    
+    <Text 
+      style={{ 
+        color: theme.subText, 
+        marginTop: 6,
+        fontSize:15, 
+        }}
+      >
+        {item.description}
     </Text>
-
-    <Text style={{ marginTop: 8, color: theme.text }}>
-      Priority: {item.priority}
+    {/*Badges*/ }
+    <View
+       style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginTop: 14,
+      }}
+    > 
+        {/* Priority Badges */  }
+      <View
+        style={{
+          backgroundColor:
+            item.priority === 'High'
+            ? '#FFE5E5'
+            : item.priority === 'Medium'
+            ? '#FFF4CC'
+            : '#E6F8E6',
+          paddingVertical: 7,
+          paddingHorizontal: 12,
+          borderRadius: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+        }}
+      >
+        <FontAwesome
+          name="circle"
+          size={20}
+          color={
+            item.priority === 'High'
+              ? '#E53935'
+              : item.priority === 'Medium'
+              ? '#F9A825'
+              : '#2E7D32'
+            }
+        />
+        <Text
+          style={{
+            color:
+              item.priority === 'High'
+              ? '#C62828'
+              : item.priority === 'Medium'
+              ? '#B8860B'
+              : '#2E7D32',
+            fontWeight: 'bold',
+            fontSize: 13,
+          }}
+        >
+          {item.priority} Priority 
+        </Text>
+      </View>
+        {/* Status Badge */ }
+      <View
+        style={{
+          backgroundColor: item.completed ? '#E6F8E6' : '#FFF4CC',
+          paddingVertical: 7,
+          paddingHorizontal: 12,
+          borderRadius: 20,
+           flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+        }}
+      >
+      <FontAwesome
+          name={item.completed ? 'check-square' : 'hourglass-half'}
+          size={14}
+          color={item.completed ? '#2E7D32' : '#B8860B'}
+        />
+      <Text
+        style={{
+          color: item.completed ? '#2E7D32': '#B8860B',
+          fontWeight: 'bold',
+          fontSize: 13,
+        }}
+      >
+        {item.completed ? 'Completed' : 'Pending'}
+      </Text>
+    </View>
+      {/* Due Date Badge */ }
+    <View
+      style={{
+        backgroundColor: '#E3F2FD',
+        paddingVertical: 7,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+      }}
+    >
+      <FontAwesome name="calendar" size={14} color="#1565C0" />
+    <Text
+      style={{
+        color: '#1565C0',
+        fontWeight: 'bold',
+        fontSize: 13,
+      }}
+    >
+      {new Date(item.dueDate).toLocaleDateString()}
     </Text>
-
-    <Text style={{ color: item.completed ? 'green' : theme.text, marginTop: 4 }}>
-      Status: {item.completed ? 'Completed' : 'Pending'}
-    </Text>
-
-    <Text style={{ color: theme.text }}>
-      Due: {new Date(item.dueDate).toLocaleDateString()}
-    </Text>
-
+  </View>
+</View>
+      {/* Action Buttons */}
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 12,
-        gap: 15,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+         borderTopWidth: 1,
+        borderTopColor: isDarkMode ? '#263445' : '#E5E7EB',
+        marginTop: 16,
+        paddingTop: 14,
       }}
     >
-      <TouchableOpacity onPress={() => toggleCompleteTask(item.id)}>
-        <Text style={{ color: item.completed ? 'green' : '#208AEF', fontWeight: 'bold' }}>
-          {item.completed ? 'Undo' : 'Mark Complete'}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push(`/addTask?id=${item.id}`)}>
-        <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
-          Edit
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => deleteTask(item.id)}>
-        <Text style={{ color: 'red', fontWeight: 'bold' }}>
-          Delete
-        </Text>
-      </TouchableOpacity>
-    </View>
+      {/*Complete/Undo Button*/ }
+    <TouchableOpacity 
+      onPress={() => toggleCompleteTask(item.id)}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+    >
+    <FontAwesome
+      name={item.completed ? 'undo' : 'check-circle'}
+      size={17}
+      color={item.completed ? 'green' : '#208AEF'}
+    />
+      <Text 
+        style={{ 
+          color: item.completed ? 'green' : '#208AEF', 
+          fontWeight: 'bold' 
+        }}
+      >
+        {item.completed ? 'Undo' : ' Complete'}
+      </Text>
+    </TouchableOpacity>
+        {/*Edit Button*/ }
+    <TouchableOpacity 
+      onPress={() => router.push(`/addTask?id=${item.id}`)}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+    >
+      <FontAwesome name="pencil" size={17} color="#208AEF" />
+      <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
+        Edit
+      </Text>
+    </TouchableOpacity>
+        {/*Delete Button*/ }
+    <TouchableOpacity 
+      onPress={() => deleteTask(item.id)}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+    >
+      <FontAwesome name="trash" size={17} color="red" />
+      <Text style={{ color: 'red', fontWeight: 'bold' }}>
+        Delete
+      </Text>
+    </TouchableOpacity>
+  </View>
   </View>
 );
   const filteredTasks = tasks.filter(
@@ -221,7 +349,10 @@ useFocusEffect(
     task.description
       .toLowerCase()
       .includes(searchText.toLowerCase())
-);
+  );
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const pendingTasks = tasks.filter((task) => !task.completed).length;
   return (
     <View 
       style={{
@@ -232,167 +363,352 @@ useFocusEffect(
       <View
         style={{
           backgroundColor: theme.header,
-          paddingTop: 70,
-          paddingBottom: 5,
-          paddingHorizontal: 10,
+          paddingTop: 65,
+          paddingBottom: 28,
+          paddingHorizontal: 22,
+          borderBottomLeftRadius: 28,
+          borderBottomRightRadius: 28,
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <View>
-        <Text
+        <View
           style={{
-            fontSize: 32,
-            fontWeight: 'bold',
-            color:'white',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          My Tasks
-        </Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+              fontSize: 32,
+              fontWeight: 'bold',
+              color:'white',
+            }}
+          >
+            My Tasks
+          </Text>
 
-        <Text
-          style={{
-            fontSize: 16,
-            color: 'white',
-            marginBottom: 10,
-          }}
-        >
-          Organize your day with simple tasks
-        </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: 'white',
+              marginBottom: 10,
+            }}
+          >
+            Organize your day with simple tasks
+          </Text>
         </View>
-        <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+        
+        <TouchableOpacity 
+        onPress={() => setIsDarkMode(!isDarkMode)}
+        style={{
+          width: 46,
+          height: 46,
+          borderRadius: 23,
+          backgroundColor: 'rgba(255,255,255,0.18)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
     <FontAwesome
       name={isDarkMode ? 'sun-o' : 'moon-o'}
       size={26}
       color="white"
-      marginLeft={70}
     />
   </TouchableOpacity>
+</View>
       </View> 
       {tasks.length === 0 ? (
-      <View
+        <View
+  style={{
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 25,
+  }}
+>
+  <View
+    style={{
+      backgroundColor: theme.card,
+      width: '100%',
+      padding: 30,
+      borderRadius: 24,
+      alignItems: 'center',
+
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+
+      elevation: 5,
+    }}
+  >
+    {/* Icon Circle */}
+    <View
+      style={{
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        backgroundColor: '#E3F2FD',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+      }}
+    >
+      <FontAwesome
+        name="tasks"
+        size={40}
+        color="#208AEF"
+      />
+    </View>
+
+    {/* Title */}
+    <Text
+      style={{
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: theme.text,
+      }}
+    >
+      No Tasks Yet
+    </Text>
+
+    {/* Subtitle */}
+    <Text
+      style={{
+        fontSize: 16,
+        color: theme.subText,
+        textAlign: 'center',
+        marginTop: 10,
+        lineHeight: 24,
+      }}
+    >
+      Stay organized and productive.
+      Create your first task to get started.
+    </Text>
+
+    {/* Add Task Button */}
+    <TouchableOpacity
+      onPress={() => router.push('/addTask')}
+      style={{
+        marginTop: 25,
+        backgroundColor: '#208AEF',
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <FontAwesome
+        name="plus"
+        size={16}
+        color="white"
+      />
+
+      <Text
         style={{
-          flexDirection:'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 20,
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: 16,
+          marginLeft: 8,
         }}
       >
-        <Text
-          style={{
-            fontSize: 32,
-            fontWeight: 'bold',
-            color: theme.text,
-          }}
-        >
-          Welcome 
-        </Text>
-        <Text
-          style={{
-            fontSize: 24,
-            color: theme.text,
-          }}
-        >
-          You don't have any tasks
-        </Text>
-      </View> 
+        Add First Task
+      </Text>
+    </TouchableOpacity>
+  </View>
+</View>
       ) : (
-  <>
-  {tasks.filter((task) => !task.completed).length > 0 && (
-    <>
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: 'bold',
-          color: theme.text,
-          marginTop: 20,
-          marginLeft: 20,
-          marginBottom: 10,
-        }}
-      >
-        Pending Tasks
+      <View style={{ flex: 1 }}>
+  <View
+    style={{
+      flexDirection: 'row',
+      marginHorizontal: 20,
+      marginTop: 20,
+      marginBottom: 15,
+      gap: 10,
+    }}
+  >
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.card,
+        padding: 14,
+        borderRadius: 16,
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ color: theme.subText, fontSize: 13 }}>Total</Text>
+      <Text style={{ color: theme.text, fontSize: 24, fontWeight: 'bold' }}>
+        {totalTasks}
       </Text>
+    </View>
 
-      <FlatList
-        data={tasks.filter((task) => !task.completed)}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-        }}
-        renderItem={renderTaskItem}
-      />
-    </>
-  )}
-
-  {tasks.filter((task) => task.completed).length > 0 && (
-    <>
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: 'bold',
-          color: theme.text,
-          marginTop: 20,
-          marginLeft: 20,
-          marginBottom: 10,
-        }}
-      >
-        Completed Tasks
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.card,
+        padding: 14,
+        borderRadius: 16,
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ color: theme.subText, fontSize: 13 }}>Pending</Text>
+      <Text style={{ color: '#F9A825', fontSize: 24, fontWeight: 'bold' }}>
+        {pendingTasks}
       </Text>
+    </View>
 
-      <FlatList
-        data={tasks.filter((task) => task.completed)}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 120,
-        }}
-        renderItem={renderTaskItem}
-      />
-    </>
-  )}
-</>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.card,
+        padding: 14,
+        borderRadius: 16,
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ color: theme.subText, fontSize: 13 }}>Done</Text>
+      <Text style={{ color: '#2E7D32', fontSize: 24, fontWeight: 'bold' }}>
+        {completedTasks}
+      </Text>
+    </View>
+  </View>
+
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginHorizontal: 20,
+      marginBottom: 12,
+    }}
+  >
+    <Text
+      style={{
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: theme.text,
+      }}
+    >
+      Today&apos;s Tasks
+    </Text>
+
+    <Text
+      style={{
+        color: theme.subText,
+        fontSize: 14,
+        fontWeight: '600',
+      }}
+    >
+      {pendingTasks} left
+    </Text>
+  </View>
+
+  <FlatList
+    data={tasks}
+    keyExtractor={(item) => item.id}
+    contentContainerStyle={{
+      paddingHorizontal: 20,
+      paddingBottom: 120,
+    }}
+    renderItem={renderTaskItem}
+    showsVerticalScrollIndicator={false}
+  />
+</View>
 )}
      <View
         style={{
           position: 'absolute',
-          bottom: 30,
-          left: 20,
-          right: 20,
-          height: 70,
-          borderRadius: 25,
+          bottom: 25,
+          left: 24,
+          right: 24,
+          height: 76,
+          borderRadius: 28,
           backgroundColor: theme.card,
           flexDirection: 'row',
-          justifyContent: 'space-around',
+          justifyContent: 'space-between',
           alignItems: 'center',
+          paddingHorizontal: 28,
+          shadowColor: '#000',
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          shadowOffset: {
+            width: 0,
+            height: 5,
+          },
+          elevation: 8,
         }}
       >
-
-        <FontAwesome name="home" size={24} color={theme.icon} />
+        {/*Home Button*/ }
+        <TouchableOpacity
+          style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          }}
+        >
+          <FontAwesome name="home" size={30} color={theme.icon} />
+          <Text
+            style={{
+              fontSize: 15,
+              color: theme.icon,
+              fontWeight: '600',
+              marginTop: 4,
+            }}
+          >
+          Home
+        </Text>
+        </TouchableOpacity>
         
+          {/*Add Task Button*/ }
         <TouchableOpacity
           onPress={() => router.push('/addTask')}
           style={{
             backgroundColor: theme.plus,
-            width: 64,
-            height: 64,
-            borderRadius: 32,
+            width: 68,
+            height: 68,
+            borderRadius: 34,
             justifyContent: 'center',
             alignItems: 'center',
+            shadowColor: theme.plus,
+            shadowOpacity: 0.35,
+            shadowRadius: 10,
+            shadowOffset: {
+              width: 0,
+              height: 5,
+            },
+            elevation: 10,
           }}
         >
-            <FontAwesome name="plus" size={24} color="white" />
+          <FontAwesome name="plus" size={30} color="white" />
         </TouchableOpacity>
-
+          {/*Search Button*/ }
         <TouchableOpacity
-  onPress={() => setSearchVisible(true)}
->
-  <FontAwesome
-    name="search"
-    size={24}
-    color={theme.icon}
-  />
-</TouchableOpacity>
+          onPress={() => setSearchVisible(true)}
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+        <FontAwesome name="search" size={30} color={theme.icon} />
+        <Text
+          style={{
+            fontSize: 15,
+            color: theme.icon,
+            fontWeight: '600',
+            marginTop: 4,
+          }}
+        >
+          Search
+        </Text>
+        </TouchableOpacity>
       </View>
       <Modal
   visible={searchVisible}
