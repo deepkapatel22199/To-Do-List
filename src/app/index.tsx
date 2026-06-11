@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from './context/ThemeContext';
-import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert} from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Task = {
@@ -20,6 +20,9 @@ export default function Index() {
   const [showOnboarding, setShowOnboarding] = useState(true);
 
   const [tasks, setTasks] = useState<Task[]>([]);
+
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const loadTasks = async () => {
   const savedTasks = await AsyncStorage.getItem('tasks');
@@ -210,7 +213,15 @@ useFocusEffect(
     </View>
   </View>
 );
-
+  const filteredTasks = tasks.filter(
+  (task) =>
+    task.title
+      .toLowerCase()
+      .includes(searchText.toLowerCase()) ||
+    task.description
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
+);
   return (
     <View 
       style={{
@@ -373,8 +384,136 @@ useFocusEffect(
             <FontAwesome name="plus" size={24} color="white" />
         </TouchableOpacity>
 
-        <FontAwesome name="search" size={24} color={theme.icon} />
+        <TouchableOpacity
+  onPress={() => setSearchVisible(true)}
+>
+  <FontAwesome
+    name="search"
+    size={24}
+    color={theme.icon}
+  />
+</TouchableOpacity>
       </View>
+      <Modal
+  visible={searchVisible}
+  transparent={true}
+  animationType="fade"
+>
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      padding: 20,
+    }}
+  >
+    <View
+      style={{
+        backgroundColor: theme.card,
+        borderRadius: 20,
+        padding: 20,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.text,
+          fontSize: 22,
+          fontWeight: 'bold',
+          marginBottom: 15,
+        }}
+      >
+        Search Tasks
+      </Text>
+
+      <TextInput
+        placeholder="Search task..."
+        placeholderTextColor="#888"
+        value={searchText}
+        onChangeText={setSearchText}
+        style={{
+          borderWidth: 1,
+          borderColor: '#ddd',
+          borderRadius: 12,
+          padding: 12,
+          color: theme.text,
+          marginBottom: 15,
+        }}
+      />
+
+      {searchText.trim() !== '' && (
+  <FlatList
+    data={filteredTasks}
+    keyExtractor={(item) => item.id}
+    style={{ maxHeight: 250 }}
+    renderItem={({ item }) => (
+      <View
+        style={{
+          backgroundColor: theme.background,
+          padding: 12,
+          borderRadius: 10,
+          marginBottom: 10,
+        }}
+      >
+        <Text
+          style={{
+            color: theme.text,
+            fontWeight: 'bold',
+            fontSize: 16,
+          }}
+        >
+          {item.title}
+        </Text>
+
+        <Text
+          style={{
+            color: theme.subText,
+            marginTop: 4,
+          }}
+        >
+          {item.description}
+        </Text>
+      </View>
+    )}
+  />
+)}
+
+  {searchText.trim() !== '' && filteredTasks.length === 0 && (
+  <Text
+    style={{
+      color: theme.text,
+      textAlign: 'center',
+      marginTop: 10,
+    }}
+  >
+    No tasks found
+  </Text>
+)}
+
+      <TouchableOpacity
+        onPress={() => {
+          setSearchVisible(false);
+          setSearchText('');
+        }}
+        style={{
+          marginTop: 15,
+          backgroundColor: theme.plus,
+          padding: 12,
+          borderRadius: 12,
+        }}
+      >
+        <Text
+          style={{
+            color: 'white',
+            textAlign: 'center',
+            fontWeight: 'bold',
+          }}
+        >
+          Close
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </View>
   );
 }
