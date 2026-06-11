@@ -26,6 +26,17 @@ export default function Index() {
   setTasks(savedTasks ? JSON.parse(savedTasks) : []);
   };
 
+  const toggleCompleteTask = async (id: string) => {
+  const updatedTasks = tasks.map((task) =>
+    task.id === id
+      ? { ...task, completed: !task.completed }
+      : task
+  );
+
+  setTasks(updatedTasks);
+  await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+};
+
   const deleteTask = async (id: string) => {
   Alert.alert(
     'Delete Task',
@@ -213,6 +224,8 @@ useFocusEffect(
             fontSize: 18,
             fontWeight: 'bold',
             color: theme.text,
+            textDecorationLine: item.completed ? 'line-through' : 'none',
+            opacity: item.completed ? 0.5 : 1,
           }}
         >
           {item.title}
@@ -235,6 +248,15 @@ useFocusEffect(
         >
           Priority: {item.priority}
         </Text>
+        
+        <Text
+  style={{
+    color: item.completed ? 'green' : theme.text,
+    marginTop: 4,
+  }}
+>
+  Status: {item.completed ? 'Completed' : 'Pending'}
+</Text>
 
         <Text
           style={{
@@ -252,6 +274,18 @@ useFocusEffect(
     gap: 15,
   }}
 >
+
+  <TouchableOpacity onPress={() => toggleCompleteTask(item.id)}>
+  <Text
+    style={{
+      color: item.completed ? 'green' : '#208AEF',
+      fontWeight: 'bold',
+    }}
+  >
+    {item.completed ? 'Completed' : 'Mark Complete'}
+  </Text>
+</TouchableOpacity>
+
   <TouchableOpacity
     onPress={() => router.push(`/addTask?id=${item.id}`)}
   >
