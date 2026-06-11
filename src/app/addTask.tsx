@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
-import { router } from 'expo-router';
-import {useState } from  'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import {useState, useEffect } from  'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +20,29 @@ export default function AddTask() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
+  const { id } = useLocalSearchParams();
   
+
+  useEffect(() => {
+  const loadTaskForEdit = async () => {
+    if (!id) return;
+
+    const savedTasks = await AsyncStorage.getItem('tasks');
+    const oldTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
+
+    const selectedTask = oldTasks.find((task) => task.id === id);
+
+    if (selectedTask) {
+      setTitle(selectedTask.title);
+      setDescription(selectedTask.description);
+      setPriority(selectedTask.priority);
+      setDueDate(new Date(selectedTask.dueDate));
+    }
+  };
+
+  loadTaskForEdit();
+}, [id]);
 
   const handleAddTask = async () => {
   if (title.trim() === '') {
@@ -39,9 +61,32 @@ export default function AddTask() {
 
   const savedTasks = await AsyncStorage.getItem('tasks');
   const oldTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
+  if (id) {
+    const updatedTasks = oldTasks.map((task) =>
+      task.id === id
+        ? {
+            ...task,
+            title: title.trim(),
+            description: description.trim(),
+            priority,
+            dueDate: dueDate.toLocaleDateString(),
+          }
+        : task
+    );
 
-  await AsyncStorage.setItem('tasks', JSON.stringify([...oldTasks, newTask]));
+    await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+  } else {
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      description: description.trim(),
+      priority,
+      dueDate: dueDate,
+      completed: false,
+    };
 
+    await AsyncStorage.setItem('tasks', JSON.stringify([...oldTasks, newTask]));
+  }
   router.back();
 };
 
@@ -79,7 +124,7 @@ export default function AddTask() {
                 color: 'white',
               }}
             >
-              Create Task
+              {id ? 'Edit Task' : 'Create Task'}
             </Text>
             <Text
               style={{
@@ -87,7 +132,7 @@ export default function AddTask() {
                 fontSize: 16,
               }}
             >
-              Add a new task to your list
+              {id ? 'Update your task details' : 'Add a new task to your list'}
             </Text>
           </View>
         </View>
@@ -229,7 +274,7 @@ export default function AddTask() {
         }}
       >
         <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>
-          Add Task
+          {id ? 'Update Task' : 'Add Task'}
         </Text>
       </TouchableOpacity>
  
