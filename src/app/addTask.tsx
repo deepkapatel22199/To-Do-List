@@ -11,7 +11,7 @@ type Task = {
   title: string;
   description: string;
   priority: string;
-  dueDate: Date;
+  dueDate: string;
   completed: boolean;
 };
 
@@ -52,14 +52,6 @@ export default function AddTask() {
     return;
   }
 
-  const newTask: Task = {
-    id: Date.now().toString(),
-    title: title.trim(),
-    description: description.trim(),
-    priority,
-    dueDate: dueDate,
-    completed: false,
-  };
 
   const savedTasks = await AsyncStorage.getItem('tasks');
   const oldTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
@@ -71,7 +63,7 @@ export default function AddTask() {
             title: title.trim(),
             description: description.trim(),
             priority,
-            dueDate: dueDate.toLocaleDateString(),
+            dueDate: dueDate.toISOString(),
           }
         : task
     );
@@ -83,7 +75,7 @@ export default function AddTask() {
       title: title.trim(),
       description: description.trim(),
       priority,
-      dueDate: dueDate,
+      dueDate: dueDate.toISOString(),
       completed: false,
     };
 
@@ -156,10 +148,12 @@ export default function AddTask() {
       >
         <TextInput
         placeholder="Task Title"
+        placeholderTextColor={theme.text}
         value={title}
         onChangeText={setTitle}
         style={{
           backgroundColor: theme.inputBackground, 
+          color: theme.text,
           borderRadius: 12,
           padding: 14,
           marginBottom: 16,
@@ -170,6 +164,7 @@ export default function AddTask() {
 
       <TextInput
         placeholder="Task Description"
+        placeholderTextColor={theme.text}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -198,6 +193,7 @@ export default function AddTask() {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
+    color: theme.text,
   }}
 >
   Priority
@@ -210,7 +206,7 @@ export default function AddTask() {
   <Text style={{ fontSize: 20, marginRight: 10 }}>
     {priority === 'Low' ? '🟢' : '⚪'}
   </Text>
-  <Text>Low</Text>
+  <Text style={{ color: theme.text }}> Low </Text>
 </TouchableOpacity>
 
 <TouchableOpacity
@@ -220,7 +216,7 @@ export default function AddTask() {
   <Text style={{ fontSize: 20, marginRight: 10 }}>
     {priority === 'Medium' ? '🟡' : '⚪'}
   </Text>
-  <Text>Medium</Text>
+  <Text style={{ color: theme.text }}>Medium</Text>
 </TouchableOpacity>
 
 <TouchableOpacity
@@ -230,7 +226,7 @@ export default function AddTask() {
   <Text style={{ fontSize: 20, marginRight: 10 }}>
     {priority === 'High' ? '🔴' : '⚪'}
   </Text>
-  <Text>High</Text>
+  <Text style={{ color: theme.text }}>High</Text>
 </TouchableOpacity>
       </View>
       
@@ -240,6 +236,7 @@ export default function AddTask() {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
+    color: theme.text,
   }}
 >
   Due Date
@@ -256,7 +253,7 @@ export default function AddTask() {
     borderColor: '#ddd',
   }}
 >
-  <Text>
+  <Text style={{ color: theme.text }}>
     {dueDate.toLocaleDateString()}
   </Text>
 </TouchableOpacity>

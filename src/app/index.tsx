@@ -241,7 +241,7 @@ useFocusEffect(
             color: theme.text,
           }}
         >
-          Due: {item.dueDate.toLocaleString()}
+          Due: {new Date(item.dueDate).toLocaleDateString()}
         </Text>
 
         <View
