@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList} from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Task = {
@@ -22,6 +22,28 @@ export default function Index() {
   const loadTasks = async () => {
   const savedTasks = await AsyncStorage.getItem('tasks');
   setTasks(savedTasks ? JSON.parse(savedTasks) : []);
+  };
+
+  const deleteTask = async (id: string) => {
+  Alert.alert(
+    'Delete Task',
+    'Are you sure you want to delete this task?',
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const updatedTasks = tasks.filter((task) => task.id !== id);
+          setTasks(updatedTasks);
+          await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        },
+      },
+    ]
+  );
 };
 
 useFocusEffect(
@@ -198,6 +220,32 @@ useFocusEffect(
         <Text>
           Due: {item.dueDate}
         </Text>
+
+        <View
+  style={{
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+    gap: 15,
+  }}
+>
+  <TouchableOpacity
+    onPress={() => router.push(`/addTask?id=${item.id}`)}
+  >
+    <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
+      Edit
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => deleteTask(item.id)}
+  >
+    <Text style={{ color: 'red', fontWeight: 'bold' }}>
+      Delete
+    </Text>
+  </TouchableOpacity>
+</View>
+
       </View>
     )}
   />
