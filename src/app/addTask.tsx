@@ -64,6 +64,7 @@ export default function AddTask() {
             description: description.trim(),
             priority,
             dueDate: dueDate.toISOString(),
+            completed: false,
           }
         : task
     );

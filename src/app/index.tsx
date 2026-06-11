@@ -23,7 +23,17 @@ export default function Index() {
 
   const loadTasks = async () => {
   const savedTasks = await AsyncStorage.getItem('tasks');
-  setTasks(savedTasks ? JSON.parse(savedTasks) : []);
+   const loadedTasks: Task[] = savedTasks
+    ? JSON.parse(savedTasks)
+    : [];
+
+  loadedTasks.sort((a, b) => {
+    if (a.completed === b.completed) return 0;
+
+    return a.completed ? 1 : -1;
+  });
+
+  setTasks(loadedTasks);
   };
 
   const toggleCompleteTask = async (id: string) => {
@@ -32,6 +42,13 @@ export default function Index() {
       ? { ...task, completed: !task.completed }
       : task
   );
+
+
+  updatedTasks.sort((a, b) => {
+    if (a.completed === b.completed) return 0;
+
+    return a.completed ? 1 : -1;
+  });
 
   setTasks(updatedTasks);
   await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
@@ -125,6 +142,75 @@ useFocusEffect(
       </View>
     );
   }
+
+  const renderTaskItem = ({ item }: { item: Task }) => (
+  <View
+    style={{
+      backgroundColor: theme.card,
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: '#ddd',
+    }}
+  >
+    <Text
+      style={{
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: theme.text,
+        textDecorationLine: item.completed ? 'line-through' : 'none',
+        opacity: item.completed ? 0.5 : 1,
+      }}
+    >
+      {item.title}
+    </Text>
+
+    <Text style={{ color: theme.subText, marginTop: 5 }}>
+      {item.description}
+    </Text>
+
+    <Text style={{ marginTop: 8, color: theme.text }}>
+      Priority: {item.priority}
+    </Text>
+
+    <Text style={{ color: item.completed ? 'green' : theme.text, marginTop: 4 }}>
+      Status: {item.completed ? 'Completed' : 'Pending'}
+    </Text>
+
+    <Text style={{ color: theme.text }}>
+      Due: {new Date(item.dueDate).toLocaleDateString()}
+    </Text>
+
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 12,
+        gap: 15,
+      }}
+    >
+      <TouchableOpacity onPress={() => toggleCompleteTask(item.id)}>
+        <Text style={{ color: item.completed ? 'green' : '#208AEF', fontWeight: 'bold' }}>
+          {item.completed ? 'Undo' : 'Mark Complete'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push(`/addTask?id=${item.id}`)}>
+        <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
+          Edit
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => deleteTask(item.id)}>
+        <Text style={{ color: 'red', fontWeight: 'bold' }}>
+          Delete
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
+
   return (
     <View 
       style={{
@@ -201,111 +287,60 @@ useFocusEffect(
         </Text>
       </View> 
       ) : (
-  <FlatList
-    data={tasks}
-    keyExtractor={(item) => item.id}
-    contentContainerStyle={{
-      padding: 20,
-      paddingBottom: 120,
-    }}
-    renderItem={({ item }) => (
-      <View
+  <>
+  {tasks.filter((task) => !task.completed).length > 0 && (
+    <>
+      <Text
         style={{
-          backgroundColor: theme.card,
-          padding: 16,
-          borderRadius: 12,
-          marginBottom: 12,
-          borderWidth: 1,
-          borderColor: '#ddd',
+          fontSize: 22,
+          fontWeight: 'bold',
+          color: theme.text,
+          marginTop: 20,
+          marginLeft: 20,
+          marginBottom: 10,
         }}
       >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: theme.text,
-            textDecorationLine: item.completed ? 'line-through' : 'none',
-            opacity: item.completed ? 0.5 : 1,
-          }}
-        >
-          {item.title}
-        </Text>
+        Pending Tasks
+      </Text>
 
-        <Text
-          style={{
-            color: theme.subText,
-            marginTop: 5,
-          }}
-        >
-          {item.description}
-        </Text>
-
-        <Text
-          style={{
-            marginTop: 8,
-            color: theme.text,
+      <FlatList
+        data={tasks.filter((task) => !task.completed)}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
         }}
-        >
-          Priority: {item.priority}
-        </Text>
-        
-        <Text
-  style={{
-    color: item.completed ? 'green' : theme.text,
-    marginTop: 4,
-  }}
->
-  Status: {item.completed ? 'Completed' : 'Pending'}
-</Text>
+        renderItem={renderTaskItem}
+      />
+    </>
+  )}
 
-        <Text
-          style={{
-            color: theme.text,
-          }}
-        >
-          Due: {new Date(item.dueDate).toLocaleDateString()}
-        </Text>
+  {tasks.filter((task) => task.completed).length > 0 && (
+    <>
+      <Text
+        style={{
+          fontSize: 22,
+          fontWeight: 'bold',
+          color: theme.text,
+          marginTop: 20,
+          marginLeft: 20,
+          marginBottom: 10,
+        }}
+      >
+        Completed Tasks
+      </Text>
 
-        <View
-  style={{
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 12,
-    gap: 15,
-  }}
->
-
-  <TouchableOpacity onPress={() => toggleCompleteTask(item.id)}>
-  <Text
-    style={{
-      color: item.completed ? 'green' : '#208AEF',
-      fontWeight: 'bold',
-    }}
-  >
-    {item.completed ? 'Completed' : 'Mark Complete'}
-  </Text>
-</TouchableOpacity>
-
-  <TouchableOpacity
-    onPress={() => router.push(`/addTask?id=${item.id}`)}
-  >
-    <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
-      Edit
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    onPress={() => deleteTask(item.id)}
-  >
-    <Text style={{ color: 'red', fontWeight: 'bold' }}>
-      Delete
-    </Text>
-  </TouchableOpacity>
-</View>
-
-      </View>
-    )}
-  />
+      <FlatList
+        data={tasks.filter((task) => task.completed)}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 120,
+        }}
+        renderItem={renderTaskItem}
+      />
+    </>
+  )}
+</>
 )}
      <View
         style={{
