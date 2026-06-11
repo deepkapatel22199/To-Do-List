@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import { useTheme } from './context/ThemeContext';
 import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,19 +15,9 @@ type Task = {
 };
 
 export default function Index() {
+  const { isDarkMode, setIsDarkMode, theme } = useTheme();
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const theme = {
-    background: isDarkMode ? '#121212' : '#F7F9FC',
-    header: isDarkMode ? '#1E1E1E' : '#208AEF',
-    card: isDarkMode ? '#1E1E1E' : 'white',
-    icon: isDarkMode ? 'white' : '#208AEF',
-    text: isDarkMode ? 'white' : 'black',
-    plus: isDarkMode ? '#121212' : '#208AEF',
-    subText: isDarkMode ? '#B0B0B0' : '#666',
-};
 
   const [tasks, setTasks] = useState<Task[]>([]);
 

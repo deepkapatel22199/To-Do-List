@@ -1,10 +1,16 @@
 import { Stack } from "expo-router";
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function RootLayout() {
-  return <Stack 
-     screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_right',
-      }}
-  />;
+  return (
+    <ThemeProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      />
+    </ThemeProvider>
+  );
 }
+

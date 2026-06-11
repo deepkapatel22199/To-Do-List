@@ -1,6 +1,7 @@
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {useState, useEffect } from  'react';
+import { useTheme } from './context/ThemeContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +16,7 @@ type Task = {
 };
 
 export default function AddTask() {
+  const { isDarkMode, setIsDarkMode, theme } = useTheme();
   const [priority, setPriority] = useState('Medium');
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -92,10 +94,10 @@ export default function AddTask() {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F9FC' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <View
         style={{
-          backgroundColor: '#208AEF',
+          backgroundColor: theme.header,
           paddingTop: 60,
           paddingBottom: 10,
           paddingHorizontal: 20,
@@ -108,7 +110,7 @@ export default function AddTask() {
           }}
         >
           <TouchableOpacity onPress={() => router.back()}>
-            <FontAwesome name="arrow-left" size={24} color="white" />
+            <FontAwesome name="arrow-left" size={24} color={theme.icon} />
           </TouchableOpacity>
           <View 
             style={{
@@ -121,20 +123,28 @@ export default function AddTask() {
               style={{
                 fontSize: 30,
                 fontWeight: 'bold',
-                color: 'white',
+                color: theme.text,
               }}
             >
               {id ? 'Edit Task' : 'Create Task'}
             </Text>
             <Text
               style={{
-                color: '#EAF4FF',
+                color: theme.subText,
                 fontSize: 16,
               }}
             >
               {id ? 'Update your task details' : 'Add a new task to your list'}
             </Text>
           </View>
+          <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+    <FontAwesome
+      name={isDarkMode ? 'sun-o' : 'moon-o'}
+      size={26}
+      color="white"
+      marginLeft={70}
+    />
+  </TouchableOpacity>
         </View>
       </View>
       <View
@@ -149,7 +159,7 @@ export default function AddTask() {
         value={title}
         onChangeText={setTitle}
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.inputBackground, 
           borderRadius: 12,
           padding: 14,
           marginBottom: 16,
@@ -164,7 +174,7 @@ export default function AddTask() {
         onChangeText={setDescription}
         multiline
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.inputBackground,
           borderRadius: 12,
           padding: 14,
           height: 120,
@@ -238,7 +248,7 @@ export default function AddTask() {
 <TouchableOpacity
   onPress={() => setShowDatePicker(true)}
   style={{
-    backgroundColor: 'white',
+    backgroundColor: theme.inputBackground,
     borderRadius: 12,
     padding: 14,
     marginBottom: 20,
@@ -268,12 +278,12 @@ export default function AddTask() {
       <TouchableOpacity
         onPress={handleAddTask}
         style={{
-          backgroundColor: '#208AEF',
+          backgroundColor: theme.header,
           padding: 16,
           borderRadius: 12,
         }}
       >
-        <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>
+        <Text style={{ color: theme.text, textAlign: 'center', fontWeight: 'bold' }}>
           {id ? 'Update Task' : 'Add Task'}
         </Text>
       </TouchableOpacity>
