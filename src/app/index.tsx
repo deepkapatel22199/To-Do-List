@@ -16,6 +16,17 @@ type Task = {
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const theme = {
+    background: isDarkMode ? '#121212' : '#F7F9FC',
+    header: isDarkMode ? '#1E1E1E' : '#208AEF',
+    card: isDarkMode ? '#1E1E1E' : 'white',
+    icon: isDarkMode ? 'white' : '#208AEF',
+    text: isDarkMode ? 'white' : 'black',
+    plus: isDarkMode ? '#121212' : '#208AEF',
+    subText: isDarkMode ? '#B0B0B0' : '#666',
+};
 
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -116,17 +127,21 @@ useFocusEffect(
     <View 
       style={{
         flex: 1,
-        backgroundColor: '#F7F9FC',
+        backgroundColor: theme.background,
       }}
     >
       <View
         style={{
-          backgroundColor: '#208AEF',
+          backgroundColor: theme.header,
           paddingTop: 70,
           paddingBottom: 5,
           paddingHorizontal: 10,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
+        <View>
         <Text
           style={{
             fontSize: 32,
@@ -146,6 +161,15 @@ useFocusEffect(
         >
           Organize your day with simple tasks
         </Text>
+        </View>
+        <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+    <FontAwesome
+      name={isDarkMode ? 'sun-o' : 'moon-o'}
+      size={26}
+      color="white"
+      marginLeft={70}
+    />
+  </TouchableOpacity>
       </View> 
       {tasks.length === 0 ? (
       <View
@@ -160,6 +184,7 @@ useFocusEffect(
           style={{
             fontSize: 32,
             fontWeight: 'bold',
+            color: theme.text,
           }}
         >
           Welcome 
@@ -167,6 +192,7 @@ useFocusEffect(
         <Text
           style={{
             fontSize: 24,
+            color: theme.text,
           }}
         >
           You don't have any tasks
@@ -183,7 +209,7 @@ useFocusEffect(
     renderItem={({ item }) => (
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.card,
           padding: 16,
           borderRadius: 12,
           marginBottom: 12,
@@ -195,6 +221,7 @@ useFocusEffect(
           style={{
             fontSize: 18,
             fontWeight: 'bold',
+            color: theme.text,
           }}
         >
           {item.title}
@@ -202,7 +229,7 @@ useFocusEffect(
 
         <Text
           style={{
-            color: '#666',
+            color: theme.subText,
             marginTop: 5,
           }}
         >
@@ -212,13 +239,18 @@ useFocusEffect(
         <Text
           style={{
             marginTop: 8,
-          }}
+            color: theme.text,
+        }}
         >
           Priority: {item.priority}
         </Text>
 
-        <Text>
-          Due: {item.dueDate}
+        <Text
+          style={{
+            color: theme.text,
+          }}
+        >
+          Due: {item.dueDate.toLocaleString()}
         </Text>
 
         <View
@@ -258,19 +290,19 @@ useFocusEffect(
           right: 20,
           height: 70,
           borderRadius: 25,
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: theme.card,
           flexDirection: 'row',
           justifyContent: 'space-around',
           alignItems: 'center',
         }}
       >
 
-        <FontAwesome name="home" size={24} color="#2F73F6" />
+        <FontAwesome name="home" size={24} color={theme.icon} />
         
         <TouchableOpacity
           onPress={() => router.push('/addTask')}
           style={{
-            backgroundColor: '#2F73F6',
+            backgroundColor: theme.plus,
             width: 64,
             height: 64,
             borderRadius: 32,
@@ -281,7 +313,7 @@ useFocusEffect(
             <FontAwesome name="plus" size={24} color="white" />
         </TouchableOpacity>
 
-        <FontAwesome name="search" size={24} color="#2F73F6" />
+        <FontAwesome name="search" size={24} color={theme.icon} />
       </View>
     </View>
   );
