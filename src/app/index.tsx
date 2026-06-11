@@ -102,6 +102,30 @@ export default function Index() {
           Organize your day with simple tasks
         </Text>
       </View> 
+      <View
+        style={{
+          flexDirection:'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 32,
+            fontWeight: 'bold',
+          }}
+        >
+          Welcome 
+        </Text>
+        <Text
+          style={{
+            fontSize: 24,
+          }}
+        >
+          You don't have any tasks
+        </Text>
+      </View> 
 
      <View
         style={{
