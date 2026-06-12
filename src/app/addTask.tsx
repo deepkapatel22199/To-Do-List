@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {useState, useEffect } from  'react';
 import { useTheme } from '../context/ThemeContext';
@@ -88,186 +88,207 @@ export default function AddTask() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
       <View
         style={{
           backgroundColor: theme.header,
           paddingTop: 60,
-          paddingBottom: 10,
-          paddingHorizontal: 20,
+          paddingBottom: 28,
+          paddingHorizontal: 22,
+          borderBottomLeftRadius: 28,
+          borderBottomRightRadius: 28,
         }}
       >
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
           }}
         >
-          <TouchableOpacity onPress={() => router.back()}>
-            <FontAwesome name="arrow-left" size={24} color={theme.icon} />
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 23,
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <FontAwesome name="arrow-left" size={22} color='white' />
           </TouchableOpacity>
           <View 
             style={{
-              flexDirection: 'column',
-              justifyContent: 'center',
-              paddingLeft:20
+              flex: 1, 
+              marginLeft: 16,
             }}
           >
             <Text
               style={{
                 fontSize: 30,
                 fontWeight: 'bold',
-                color: theme.text,
+                color: 'rgba(255,255,255,0.85)',
               }}
             >
               {id ? 'Edit Task' : 'Create Task'}
             </Text>
             <Text
               style={{
-                color: theme.subText,
-                fontSize: 16,
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: 17,
+                marginTop: 4,
               }}
             >
               {id ? 'Update your task details' : 'Add a new task to your list'}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
-    <FontAwesome
-      name={isDarkMode ? 'sun-o' : 'moon-o'}
-      size={26}
-      color="white"
-      marginLeft={70}
-    />
-  </TouchableOpacity>
-        </View>
+          <TouchableOpacity 
+            onPress={() => setIsDarkMode(!isDarkMode)}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 23,
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+          <FontAwesome
+            name={isDarkMode ? 'sun-o' : 'moon-o'}
+            size={22}
+            color="white"
+          />
+        </TouchableOpacity>
       </View>
+    </View>
+            {/*Form Card */ }
       <View
         style={{
-              flexDirection: 'column',
-              justifyContent: 'center',
-              paddingLeft:20
-            }}
+          backgroundColor: theme.card,
+          marginHorizontal: 20,
+          marginTop: 24,
+          padding: 22,
+          borderRadius: 24,
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 5 },
+        }}
       >
         <TextInput
-        placeholder="Task Title"
-        placeholderTextColor={theme.text}
+        placeholder="Enter Task Title"
+        placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
         value={title}
         onChangeText={setTitle}
         style={{
           backgroundColor: theme.inputBackground, 
           color: theme.text,
-          borderRadius: 12,
-          padding: 14,
-          marginBottom: 16,
+          borderRadius: 14,
+          padding: 15,
+          marginBottom: 18,
           borderWidth: 1,
           borderColor: '#ddd',
+          fontSize: 17,
         }}
       />
 
       <TextInput
-        placeholder="Task Description"
-        placeholderTextColor={theme.text}
+        placeholder="Enter Task Description"
+        placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
         value={description}
         onChangeText={setDescription}
         multiline
         style={{
           backgroundColor: theme.inputBackground,
-          borderRadius: 12,
-          padding: 14,
-          height: 120,
-          marginBottom: 16,
+          borderRadius: 14,
+          padding: 15,
+          height: 140,
+          marginBottom: 18,
           borderWidth: 1,
           borderColor: '#ddd',
           textAlignVertical: 'top',
+          color: theme.text,
+          fontSize: 16,
         }}
       />
 
-      <View 
-      style={{
-              flexDirection: 'row',
-              alignItems:'center',
-              justifyContent: 'space-between',
-              paddingLeft:20
-            }}
-      >
-        <Text
-  style={{
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: theme.text,
-  }}
->
+      <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 12 , fontSize: 16}} >
   Priority
 </Text>
 
-<TouchableOpacity
-  onPress={() => setPriority('Low')}
-  style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
->
-  <Text style={{ fontSize: 20, marginRight: 10 }}>
-    {priority === 'Low' ? '🟢' : '⚪'}
-  </Text>
-  <Text style={{ color: theme.text }}> Low </Text>
-</TouchableOpacity>
+<View style={{ marginBottom: 20 }}>
+  {['Low', 'Medium', 'High'].map((item) => (
+    <TouchableOpacity
+      key={item}
+      onPress={() => setPriority(item)}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.inputBackground,
+        padding: 14,
+        borderRadius: 14,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: priority === item ? '#208AEF' : '#ddd',
+      }}
+    >
+      <FontAwesome
+        name={priority === item ? 'check-square' : 'square-o'}
+        size={22}
+        color={priority === item ? '#208AEF' : '#ddd'}
+      />
 
-<TouchableOpacity
-  onPress={() => setPriority('Medium')}
-  style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
->
-  <Text style={{ fontSize: 20, marginRight: 10 }}>
-    {priority === 'Medium' ? '🟡' : '⚪'}
-  </Text>
-  <Text style={{ color: theme.text }}>Medium</Text>
-</TouchableOpacity>
-
-<TouchableOpacity
-  onPress={() => setPriority('High')}
-  style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}
->
-  <Text style={{ fontSize: 20, marginRight: 10 }}>
-    {priority === 'High' ? '🔴' : '⚪'}
-  </Text>
-  <Text style={{ color: theme.text }}>High</Text>
-</TouchableOpacity>
-      </View>
+      <Text
+        style={{
+          color: theme.text,
+          fontWeight: 'bold',
+          fontSize: 16,
+          marginLeft: 12,
+        }}
+      >
+        {item === 'Low' ? '🟢 Low Priority' : item === 'Medium' ? '🟡 Medium Priority' : '🔴 High Priority'}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
       
 
       <Text
-  style={{
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: theme.text,
-  }}
->
-  Due Date
-</Text>
+        style={{ color: theme.text, fontWeight: 'bold', marginBottom: 8 , fontSize: 16}} >
+        Due Date
+      </Text>
 
-<TouchableOpacity
-  onPress={() => setShowDatePicker(true)}
-  style={{
-    backgroundColor: theme.inputBackground,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  }}
->
-  <Text style={{ color: theme.text }}>
-    {dueDate.toLocaleDateString()}
-  </Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => setShowDatePicker(true)}
+        style={{
+          backgroundColor: theme.inputBackground,
+          borderRadius: 14,
+          padding: 15,
+          marginBottom: 24,
+          borderWidth: 1,
+          borderColor: '#ddd',
+          flexDirection: 'row',
+            alignItems: 'center',
+        }}
+      >
+      <FontAwesome name="calendar" size={18} color={theme.text} />
+      <Text style={{ color: theme.text, marginLeft: 12,   fontSize: 16 }}>
+        {dueDate.toLocaleDateString()}
+      </Text>
+    </TouchableOpacity>
 
-{showDatePicker && (
-  <DateTimePicker
-    value={dueDate}
-    mode="date"
-    display="default"
-    onChange={(event, selectedDate) => {
-      setShowDatePicker(false);
-      if (selectedDate) {
-        setDueDate(selectedDate);
+    {showDatePicker && (
+      <DateTimePicker
+        value={dueDate}
+        mode="date"
+        display="default"
+        onValueChange={(event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+          setDueDate(selectedDate);
       }
     }}
   />
@@ -276,17 +297,21 @@ export default function AddTask() {
       <TouchableOpacity
         onPress={handleAddTask}
         style={{
-          backgroundColor: theme.header,
+          backgroundColor: '#208AEF',
           padding: 16,
-          borderRadius: 12,
+          borderRadius: 16,
+          alignItems: 'center',
+          flexDirection: 'row',
+          justifyContent: 'center',
         }}
       >
-        <Text style={{ color: theme.text, textAlign: 'center', fontWeight: 'bold' }}>
+        <Text style={{ color: theme.text, textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>
           {id ? 'Update Task' : 'Add Task'}
         </Text>
       </TouchableOpacity>
  
       </View>
+      </ScrollView>
          </SafeAreaView>
   );
 }
