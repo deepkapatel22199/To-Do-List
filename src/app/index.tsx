@@ -30,6 +30,8 @@ export default function Index() {
 
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
+
 
   const loadTasks = async () => {
   const savedTasks = await AsyncStorage.getItem('tasks');
@@ -247,7 +249,6 @@ useFocusEffect(
        style={{
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
         marginTop: 14,
       }}
     > 
@@ -265,7 +266,7 @@ useFocusEffect(
           borderRadius: 20,
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 6,
+          marginRight: 10,
         }}
       >
         <FontAwesome
@@ -289,6 +290,7 @@ useFocusEffect(
               : '#2E7D32',
             fontWeight: 'bold',
             fontSize: 13,
+            paddingLeft: 6,
           }}
         >
           {item.priority} Priority 
@@ -301,9 +303,9 @@ useFocusEffect(
           paddingVertical: 7,
           paddingHorizontal: 12,
           borderRadius: 20,
-           flexDirection: 'row',
+          flexDirection: 'row',
           alignItems: 'center',
-          gap: 6,
+          marginRight: 10,
         }}
       >
       <FontAwesome
@@ -316,6 +318,7 @@ useFocusEffect(
           color: item.completed ? '#2E7D32': '#B8860B',
           fontWeight: 'bold',
           fontSize: 13,
+          paddingLeft: 6,
         }}
       >
         {item.completed ? 'Completed' : 'Pending'}
@@ -330,7 +333,6 @@ useFocusEffect(
         borderRadius: 20,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
       }}
     >
       <FontAwesome name="calendar" size={14} color="#1565C0" />
@@ -339,6 +341,7 @@ useFocusEffect(
         color: '#1565C0',
         fontWeight: 'bold',
         fontSize: 13,
+        paddingLeft: 6,
       }}
     >
       {new Date(item.dueDate).toLocaleDateString()}
@@ -360,7 +363,7 @@ useFocusEffect(
       {/*Complete/Undo Button*/ }
     <TouchableOpacity 
       onPress={() => toggleCompleteTask(item.id)}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+      style={{ flexDirection: 'row', alignItems: 'center' }}
     >
     <FontAwesome
       name={item.completed ? 'undo' : 'check-circle'}
@@ -370,7 +373,8 @@ useFocusEffect(
       <Text 
         style={{ 
           color: item.completed ? 'green' : '#208AEF', 
-          fontWeight: 'bold' 
+          fontWeight: 'bold', 
+          paddingLeft: 6,
         }}
       >
         {item.completed ? 'Undo' : ' Complete'}
@@ -379,26 +383,33 @@ useFocusEffect(
         {/*Edit Button*/ }
     <TouchableOpacity 
       onPress={() => router.push(`/addTask?id=${item.id}`)}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+      style={{ flexDirection: 'row', alignItems: 'center',  }}
     >
       <FontAwesome name="pencil" size={17} color="#208AEF" />
-      <Text style={{ color: '#208AEF', fontWeight: 'bold' }}>
+      <Text style={{ color: '#208AEF', fontWeight: 'bold', paddingLeft: 6 }}>
         Edit
       </Text>
     </TouchableOpacity>
         {/*Delete Button*/ }
     <TouchableOpacity 
       onPress={() => deleteTask(item.id)}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+      style={{ flexDirection: 'row', alignItems: 'center',  }}
     >
       <FontAwesome name="trash" size={17} color="red" />
-      <Text style={{ color: 'red', fontWeight: 'bold' }}>
+      <Text style={{ color: 'red', fontWeight: 'bold', paddingLeft: 6 }}>
         Delete
       </Text>
     </TouchableOpacity>
   </View>
   </View>
 );
+
+  const displayedTasks = tasks.filter((task) => {
+  if (filter === 'Pending') return !task.completed;
+  if (filter === 'Completed') return task.completed;
+  return true;
+});
+
   const filteredTasks = tasks.filter(
   (task) =>
     task.title
@@ -591,7 +602,6 @@ useFocusEffect(
       marginHorizontal: 20,
       marginTop: 20,
       marginBottom: 15,
-      gap: 10,
     }}
   >
     <View
@@ -601,6 +611,7 @@ useFocusEffect(
         padding: 14,
         borderRadius: 16,
         alignItems: 'center',
+        marginRight: 10,
       }}
     >
       <Text style={{ color: theme.subText, fontSize: 13 }}>Total</Text>
@@ -616,6 +627,7 @@ useFocusEffect(
         padding: 14,
         borderRadius: 16,
         alignItems: 'center',
+        marginRight: 10,
       }}
     >
       <Text style={{ color: theme.subText, fontSize: 13 }}>Pending</Text>
@@ -670,8 +682,42 @@ useFocusEffect(
     </Text>
   </View>
 
+  <View
+  style={{
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 14,
+  }}
+>
+  {(['All', 'Pending', 'Completed'] as const).map((item) => (
+    <TouchableOpacity
+      key={item}
+      onPress={() => setFilter(item)}
+      style={{
+        paddingVertical: 9,
+        paddingHorizontal: 16,
+        borderRadius: 22,
+        backgroundColor: filter === item ? '#208AEF' : theme.card,
+        borderWidth: 1,
+        marginRight: 6,
+        borderColor: filter === item ? '#208AEF' : isDarkMode ? '#334155' : '#E5E7EB',
+      }}
+    >
+      <Text
+        style={{
+          color: filter === item ? 'white' : theme.text,
+          fontWeight: 'bold',
+          fontSize: 14,
+        }}
+      >
+        {item}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
+
   <FlatList
-    data={tasks}
+    data={displayedTasks}
     keyExtractor={(item) => item.id}
     contentContainerStyle={{
       paddingHorizontal: 20,
