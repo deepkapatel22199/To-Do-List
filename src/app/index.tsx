@@ -710,123 +710,296 @@ useFocusEffect(
         </Text>
         </TouchableOpacity>
       </View>
+      {/*Search Modal*/ } 
       <Modal
   visible={searchVisible}
   transparent={true}
-  animationType="fade"
+  animationType="slide"
 >
   <View
     style={{
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      padding: 20,
+      backgroundColor: isDarkMode
+        ? 'rgba(0,0,0,0.65)'
+        : 'rgba(0,0,0,0.35)',
+      justifyContent: 'flex-end',
     }}
   >
     <View
       style={{
         backgroundColor: theme.card,
-        borderRadius: 20,
-        padding: 20,
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        paddingHorizontal: 22,
+        paddingTop: 18,
+        paddingBottom: 30,
+        maxHeight: '80%',
       }}
     >
-      <Text
+      {/* Top Bar */}
+      <View
         style={{
-          color: theme.text,
-          fontSize: 22,
-          fontWeight: 'bold',
-          marginBottom: 15,
-        }}
-      >
-        Search Tasks
-      </Text>
-
-      <TextInput
-        placeholder="Search task..."
-        placeholderTextColor="#888"
-        value={searchText}
-        onChangeText={setSearchText}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ddd',
-          borderRadius: 12,
-          padding: 12,
-          color: theme.text,
-          marginBottom: 15,
+          width: 45,
+          height: 5,
+          borderRadius: 10,
+          backgroundColor: isDarkMode ? '#475569' : '#CBD5E1',
+          alignSelf: 'center',
+          marginBottom: 18,
         }}
       />
 
-      {searchText.trim() !== '' && (
-  <FlatList
-    data={filteredTasks}
-    keyExtractor={(item) => item.id}
-    style={{ maxHeight: 250 }}
-    renderItem={({ item }) => (
+      {/* Header */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 18,
+        }}
+      >
+        <View>
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 24,
+              fontWeight: 'bold',
+            }}
+          >
+            Search Tasks
+          </Text>
+
+          <Text
+            style={{
+              color: theme.subText,
+              fontSize: 14,
+              marginTop: 4,
+            }}
+          >
+            Find and open your task quickly
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          onPress={() => {
+            setSearchVisible(false);
+            setSearchText('');
+          }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: theme.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <FontAwesome name="times" size={20} color={theme.text} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Input */}
       <View
         style={{
           backgroundColor: theme.background,
-          padding: 12,
-          borderRadius: 10,
-          marginBottom: 10,
+          borderRadius: 16,
+          paddingHorizontal: 14,
+          paddingVertical: 4,
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+          marginBottom: 18,
         }}
       >
-        <Text
+        <FontAwesome name="search" size={18} color={theme.subText} />
+
+        <TextInput
+          placeholder="Search by title or description..."
+          placeholderTextColor={isDarkMode ? '#94A3B8' : '#64748B'}
+          value={searchText}
+          onChangeText={setSearchText}
           style={{
+            flex: 1,
             color: theme.text,
-            fontWeight: 'bold',
             fontSize: 16,
+            paddingVertical: 12,
+            marginLeft: 12,
           }}
-        >
-          {item.title}
-        </Text>
+        />
 
-        <Text
-          style={{
-            color: theme.subText,
-            marginTop: 4,
-          }}
-        >
-          {item.description}
-        </Text>
+        {searchText.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchText('')}>
+            <FontAwesome name="close" size={18} color={theme.subText} />
+          </TouchableOpacity>
+        )}
       </View>
-    )}
-  />
-)}
 
-  {searchText.trim() !== '' && filteredTasks.length === 0 && (
-  <Text
-    style={{
-      color: theme.text,
-      textAlign: 'center',
-      marginTop: 10,
-    }}
-  >
-    No tasks found
-  </Text>
-)}
-
-      <TouchableOpacity
-        onPress={() => {
-          setSearchVisible(false);
-          setSearchText('');
-        }}
-        style={{
-          marginTop: 15,
-          backgroundColor: theme.plus,
-          padding: 12,
-          borderRadius: 12,
-        }}
-      >
-        <Text
+      {/* Empty Hint */}
+      {searchText.trim() === '' && (
+        <View
           style={{
-            color: 'white',
-            textAlign: 'center',
-            fontWeight: 'bold',
+            alignItems: 'center',
+            paddingVertical: 30,
           }}
         >
-          Close
-        </Text>
-      </TouchableOpacity>
+          <FontAwesome name="search" size={42} color={theme.subText} />
+
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 18,
+              fontWeight: 'bold',
+              marginTop: 14,
+            }}
+          >
+            Start typing to search
+          </Text>
+
+          <Text
+            style={{
+              color: theme.subText,
+              fontSize: 14,
+              marginTop: 6,
+              textAlign: 'center',
+            }}
+          >
+            Search results will appear here.
+          </Text>
+        </View>
+      )}
+
+      {/* Search Results */}
+      {searchText.trim() !== '' && filteredTasks.length > 0 && (
+        <FlatList
+          data={filteredTasks}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchVisible(false);
+                setSearchText('');
+                router.push(`/addTask?id=${item.id}`);
+              }}
+              style={{
+                backgroundColor: theme.background,
+                padding: 14,
+                borderRadius: 16,
+                marginBottom: 12,
+                borderWidth: 1,
+                borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    flex: 1,
+                  }}
+                >
+                  {item.title}
+                </Text>
+
+                <FontAwesome name="chevron-right" size={14} color={theme.subText} />
+              </View>
+
+              <Text
+                style={{
+                  color: theme.subText,
+                  marginTop: 6,
+                }}
+                numberOfLines={2}
+              >
+                {item.description}
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginTop: 10,
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color:
+                      item.priority === 'High'
+                        ? '#E53935'
+                        : item.priority === 'Medium'
+                        ? '#F9A825'
+                        : '#2E7D32',
+                    fontWeight: 'bold',
+                    fontSize: 13,
+                  }}
+                >
+                  {item.priority}
+                </Text>
+
+                <Text
+                  style={{
+                    color: theme.subText,
+                    marginHorizontal: 8,
+                  }}
+                >
+                  •
+                </Text>
+
+                <Text
+                  style={{
+                    color: item.completed ? '#2E7D32' : '#F9A825',
+                    fontWeight: 'bold',
+                    fontSize: 13,
+                  }}
+                >
+                  {item.completed ? 'Completed' : 'Pending'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {/* No Results */}
+      {searchText.trim() !== '' && filteredTasks.length === 0 && (
+        <View
+          style={{
+            alignItems: 'center',
+            paddingVertical: 30,
+          }}
+        >
+          <FontAwesome name="exclamation-circle" size={42} color={theme.subText} />
+
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 18,
+              fontWeight: 'bold',
+              marginTop: 14,
+            }}
+          >
+            No tasks found
+          </Text>
+
+          <Text
+            style={{
+              color: theme.subText,
+              fontSize: 14,
+              marginTop: 6,
+              textAlign: 'center',
+            }}
+          >
+            Try searching with a different keyword.
+          </Text>
+        </View>
+      )}
     </View>
   </View>
 </Modal>
