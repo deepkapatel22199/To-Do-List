@@ -6,6 +6,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type SubTask = {
+  id: string;
+  text: string;
+  completed: boolean;
+};
+
 type Task = {
   id: string;
   title: string;
@@ -13,6 +19,7 @@ type Task = {
   priority: string;
   dueDate: string;
   completed: boolean;
+  subTasks: SubTask[];
 };
 
 export default function AddTask() {
@@ -22,6 +29,8 @@ export default function AddTask() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [checklistText, setChecklistText] = useState('');
+  const [subTasks, setSubTasks] = useState<SubTask[]>([]);
 
   const { id } = useLocalSearchParams();
   
@@ -40,11 +49,25 @@ export default function AddTask() {
       setDescription(selectedTask.description);
       setPriority(selectedTask.priority);
       setDueDate(new Date(selectedTask.dueDate));
+      setSubTasks(selectedTask.subTasks || []);
     }
   };
 
   loadTaskForEdit();
 }, [id]);
+
+  const addChecklistItem = () => {
+  if (checklistText.trim() === '') return;
+
+  const newSubTask: SubTask = {
+    id: Date.now().toString(),
+    text: checklistText.trim(),
+    completed: false,
+  };
+
+  setSubTasks([...subTasks, newSubTask]);
+  setChecklistText('');
+};
 
   const handleAddTask = async () => {
   if (title.trim() === '') {
@@ -65,6 +88,7 @@ export default function AddTask() {
             priority,
             dueDate: dueDate.toISOString(),
             completed: false,
+            subTasks,
           }
         : task
     );
@@ -78,6 +102,7 @@ export default function AddTask() {
       priority,
       dueDate: dueDate.toISOString(),
       completed: false,
+      subTasks,
     };
 
     await AsyncStorage.setItem('tasks', JSON.stringify([...oldTasks, newTask]));
@@ -214,7 +239,44 @@ export default function AddTask() {
           fontSize: 16,
         }}
       />
+  {/*checkList UI*/}
+       <TextInput
+  placeholder="Enter Tasks ..."
+  placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
+  value={checklistText}
+  onChangeText={setChecklistText}
+  onSubmitEditing={addChecklistItem}
+  returnKeyType="done"
+  style={{
+    backgroundColor: theme.inputBackground,
+    color: theme.text,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 16,
+    marginBottom: 12,
+  }}
+/>
 
+{subTasks.map((item) => (
+  <View
+    key={item.id}
+    style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+      paddingHorizontal: 4,
+    }}
+  >
+    <FontAwesome name="circle-o" size={17} color={theme.subText} />
+
+    <Text style={{ color: theme.text, marginLeft: 10, fontSize: 15, flex: 1 }}>
+      {item.text}
+    </Text>
+  </View>
+))}
+      {/*Priority Section*/ }
       <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 12 , fontSize: 16}} >
   Priority
 </Text>

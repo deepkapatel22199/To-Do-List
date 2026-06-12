@@ -5,6 +5,11 @@ import { useTheme } from '../context/ThemeContext';
 import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type SubTask = {
+  id: string;
+  text: string;
+  completed: boolean;
+};
 
 type Task = {
   id: string;
@@ -13,6 +18,7 @@ type Task = {
   priority: string;
   dueDate: string;
   completed: boolean;
+  subTasks: SubTask[];
 };
 
 export default function Index() {
@@ -53,6 +59,24 @@ export default function Index() {
 
     return a.completed ? 1 : -1;
   });
+
+  setTasks(updatedTasks);
+  await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+};
+
+  const toggleSubTask = async (taskId: string, subTaskId: string) => {
+  const updatedTasks = tasks.map((task) =>
+    task.id === taskId
+      ? {
+          ...task,
+          subTasks: (task.subTasks || []).map((sub) =>
+            sub.id === subTaskId
+              ? { ...sub, completed: !sub.completed }
+              : sub
+          ),
+        }
+      : task
+  );
 
   setTasks(updatedTasks);
   await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
@@ -184,6 +208,40 @@ useFocusEffect(
       >
         {item.description}
     </Text>
+        {item.subTasks && item.subTasks.length > 0 && (
+  <View style={{ marginTop: 12 }}>
+    {item.subTasks.map((sub) => (
+      <TouchableOpacity
+        key={sub.id}
+        onPress={() => toggleSubTask(item.id, sub.id)}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
+        <FontAwesome
+          name={sub.completed ? 'circle' : 'circle-o'}
+          size={17}
+          color={sub.completed ? '#208AEF' : theme.subText}
+        />
+
+        <Text
+          style={{
+            color: sub.completed ? theme.subText : theme.text,
+            marginLeft: 10,
+            fontSize: 14,
+            textDecorationLine: sub.completed ? 'line-through' : 'none',
+            flex: 1,
+          }}
+        >
+          {sub.text}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+)}
+
     {/*Badges*/ }
     <View
        style={{
