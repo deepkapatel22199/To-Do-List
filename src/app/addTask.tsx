@@ -1,4 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {useState, useEffect } from  'react';
 import { useTheme } from '../context/ThemeContext';
@@ -112,7 +113,13 @@ export default function AddTask() {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+    <SafeAreaView
+    edges={['top']}
+    style={{
+      flex: 1,
+      backgroundColor: theme.header,
+    }}
+  >
       <ScrollView showsVerticalScrollIndicator={false}>
       <View
         style={{

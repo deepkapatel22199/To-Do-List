@@ -25,7 +25,7 @@ export default function Index() {
   const { isDarkMode, setIsDarkMode, theme } = useTheme();
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
-
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const [searchVisible, setSearchVisible] = useState(false);
@@ -115,10 +115,26 @@ useFocusEffect(
   useEffect(() => {
     setTimeout(() => {
       setShowSplash(false);
-    }, 2000);
+    }, 500);
   }, []);
 
-  if (showSplash) {
+  useEffect(() => {
+  const checkOnboardingStatus = async () => {
+    const onboardingSeen = await AsyncStorage.getItem('onboardingSeen');
+
+    if (onboardingSeen === 'true') {
+      setShowOnboarding(false);
+    } else {
+      setShowOnboarding(true);
+    }
+
+    setCheckingOnboarding(false);
+  };
+
+  checkOnboardingStatus();
+}, []);
+
+  if (showSplash || checkingOnboarding) {
     return (
       <View
         style={{
@@ -137,7 +153,7 @@ useFocusEffect(
           }}
         />
         <Text style={{ fontSize: 36, fontWeight: 'bold', color: 'white' }}>
-          To Do List 
+          NextTask
         </Text>
         <Text style={{ fontSize: 16, color: 'white', marginTop: 10 }}>
           Make your daily tasks easier
@@ -164,7 +180,10 @@ useFocusEffect(
         </Text>
 
         <TouchableOpacity
-          onPress={() => setShowOnboarding(false)}
+           onPress={async () => {
+            await AsyncStorage.setItem('onboardingSeen', 'true');
+            setShowOnboarding(false);
+        }}
           style={{ backgroundColor: '#208AEF', paddingVertical: 15, paddingHorizontal: 50, borderRadius: 12 }}
         >
           <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Get Started</Text>

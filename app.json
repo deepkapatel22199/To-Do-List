@@ -1,15 +1,14 @@
 {
   "expo": {
-    "name": "TodoListApp",
-    "slug": "TodoListApp",
+    "name": "NextTask : Prioritize Your Day",
+    "slug": "nexttask : prioritize your day",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "todolistapp",
+    "icon": "./assets/images/splash-icon.png",
+    "scheme": "nexttask : prioritize your day",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.deepkapatel.TodoListApp",
+      "bundleIdentifier": "com.deepkapatel.nexttask",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -33,14 +32,15 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#7C3AED",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 120
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
