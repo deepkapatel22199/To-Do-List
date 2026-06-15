@@ -312,7 +312,7 @@ const getPriorityStyle = (priority: string) => {
         <View 
           style={{ 
             marginTop: 14, 
-            backgroundColor: isDarkMode ? '#111827' : '#F8FAFC',
+            backgroundColor: isDarkMode ? '#121212' : '#F8FAFC',
             borderRadius: 14,
             padding: 12,
           }}

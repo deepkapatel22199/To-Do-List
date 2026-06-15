@@ -111,6 +111,32 @@ export default function AddTask() {
   router.back();
 };
 
+  const getPriorityColors = (item: string) => {
+  if (item === 'High') {
+    return {
+      bg: '#FEE2E2',
+      border: '#EF4444',
+      text: '#B91C1C',
+      icon: '#EF4444',
+    };
+  }
+
+  if (item === 'Medium') {
+    return {
+      bg: '#FEF3C7',
+      border: '#F59E0B',
+      text: '#92400E',
+      icon: '#F59E0B',
+    };
+  }
+
+  return {
+    bg: '#DCFCE7',
+    border: '#22C55E',
+    text: '#166534',
+    icon: '#22C55E',
+  };
+};
 
   return (
     <SafeAreaView
@@ -120,11 +146,17 @@ export default function AddTask() {
       backgroundColor: theme.header,
     }}
   >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          backgroundColor: theme.background,
+        }}
+      >
       <View
         style={{
           backgroundColor: theme.header,
-          paddingTop: 60,
+          paddingTop : 15,
           paddingBottom: 28,
           paddingHorizontal: 22,
           borderBottomLeftRadius: 28,
@@ -202,12 +234,14 @@ export default function AddTask() {
           marginHorizontal: 20,
           marginTop: 24,
           padding: 22,
-          borderRadius: 24,
-          elevation: 5,
+          borderRadius: 26,
+          elevation: 6,
           shadowColor: '#000',
           shadowOpacity: 0.08,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 5 },
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 6 },
+          borderWidth: 1,
+          borderColor: isDarkMode ? '#263445' : '#E5E7EB',
         }}
       >
         <TextInput
@@ -218,12 +252,13 @@ export default function AddTask() {
         style={{
           backgroundColor: theme.inputBackground, 
           color: theme.text,
-          borderRadius: 14,
-          padding: 15,
-          marginBottom: 18,
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 16,
           borderWidth: 1,
-          borderColor: '#ddd',
+          borderColor: isDarkMode ? '#334155' : '#E5E7EB' ,
           fontSize: 17,
+          fontWeight: '600',
         }}
       />
 
@@ -235,15 +270,16 @@ export default function AddTask() {
         multiline
         style={{
           backgroundColor: theme.inputBackground,
-          borderRadius: 14,
-          padding: 15,
-          height: 140,
-          marginBottom: 18,
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 16,
+          height: 130,
           borderWidth: 1,
-          borderColor: '#ddd',
+          borderColor: isDarkMode ? '#334155' : '#E5E7EB' ,
           textAlignVertical: 'top',
           color: theme.text,
           fontSize: 16,
+          lineHeight: 22,
         }}
       />
   {/*checkList UI*/}
@@ -257,10 +293,10 @@ export default function AddTask() {
   style={{
     backgroundColor: theme.inputBackground,
     color: theme.text,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: isDarkMode ? '#334155' : '#E5E7EB',
     fontSize: 16,
     marginBottom: 12,
   }}
@@ -273,7 +309,11 @@ export default function AddTask() {
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 10,
-      paddingHorizontal: 4,
+      backgroundColor: isDarkMode ? '#111827' : '#F8FAFC',
+      padding: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#263445' : '#E5E7EB',
     }}
   >
     <FontAwesome name="circle-o" size={17} color={theme.subText} />
@@ -284,47 +324,62 @@ export default function AddTask() {
   </View>
 ))}
       {/*Priority Section*/ }
-      <Text style={{ color: theme.text, fontWeight: 'bold', marginBottom: 12 , fontSize: 16}} >
-  Priority
-</Text>
+      <Text 
+        style={{ 
+          color: theme.text, 
+          fontWeight: '800', 
+          marginBottom: 12 , 
+          fontSize: 16
+          }} 
+        >
+          Priority
+      </Text>
 
-<View style={{ marginBottom: 20 }}>
-  {['Low', 'Medium', 'High'].map((item) => (
+      <View style={{ marginBottom: 22 }}>
+  {['Low', 'Medium', 'High'].map((item) => {
+     const colors = getPriorityColors(item);
+    const selected = priority === item;
+    return(
     <TouchableOpacity
       key={item}
       onPress={() => setPriority(item)}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.inputBackground,
-        padding: 14,
-        borderRadius: 14,
+        backgroundColor: selected ? colors.bg : theme.inputBackground,
+        padding: 15,
+        borderRadius: 16,
         marginBottom: 10,
-        borderWidth: 1,
-        borderColor: priority === item ? '#208AEF' : '#ddd',
+        borderWidth: 1.5,
+        borderColor: selected ? colors.border : isDarkMode ? '#334155' : '#E5E7EB',
       }}
     >
       <FontAwesome
-        name={priority === item ? 'check-square' : 'square-o'}
+        name={selected ? 'check-circle' : 'square-o'}
         size={22}
-        color={priority === item ? '#208AEF' : '#ddd'}
+        color={selected ? colors.icon : theme.subText}
       />
 
       <Text
         style={{
-          color: theme.text,
-          fontWeight: 'bold',
+          color: selected ? colors.text : theme.text,
+          fontWeight: '800',
           fontSize: 16,
           marginLeft: 12,
         }}
       >
-        {item === 'Low' ? '🟢 Low Priority' : item === 'Medium' ? '🟡 Medium Priority' : '🔴 High Priority'}
+        {item === 'Low' 
+        ? '🟢 Low Priority' : 
+        item === 'Medium' ? 
+        '🟡 Medium Priority' : 
+        '🔴 High Priority'}
       </Text>
     </TouchableOpacity>
-  ))}
+    );
+})}
 </View>
       
-
+      {/* Date Picker */}
       <Text
         style={{ color: theme.text, fontWeight: 'bold', marginBottom: 8 , fontSize: 16}} >
         Due Date
@@ -335,10 +390,10 @@ export default function AddTask() {
         style={{
           backgroundColor: theme.inputBackground,
           borderRadius: 14,
-          padding: 15,
+          padding: 16,
           marginBottom: 24,
           borderWidth: 1,
-          borderColor: '#ddd',
+          borderColor: isDarkMode ? '#334155' : '#E5E7EB',
           flexDirection: 'row',
             alignItems: 'center',
         }}
@@ -363,18 +418,32 @@ export default function AddTask() {
   />
 )}
 
+      {/* Save Button */}
+
       <TouchableOpacity
         onPress={handleAddTask}
         style={{
           backgroundColor: '#208AEF',
-          padding: 16,
-          borderRadius: 16,
+          padding: 17,
+          borderRadius: 18,
           alignItems: 'center',
           flexDirection: 'row',
           justifyContent: 'center',
+          shadowColor: '#208AEF',
+          shadowOpacity: 0.3,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 5 },
+          elevation: 6,
         }}
       >
-        <Text style={{ color: theme.text, textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>
+
+        <FontAwesome
+          name={id ? 'save' : 'plus'}
+          size={17}
+          color="white"
+          style={{ marginRight: 8 }}
+        />
+        <Text style={{ color: 'white', textAlign: 'center', fontWeight: '900', fontSize: 16 }}>
           {id ? 'Update Task' : 'Add Task'}
         </Text>
       </TouchableOpacity>
