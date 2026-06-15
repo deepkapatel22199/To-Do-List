@@ -31,6 +31,8 @@ export default function Index() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
+  const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date'>('Newest');
+  const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
 
 
   const loadTasks = async () => {
@@ -467,11 +469,33 @@ const getPriorityStyle = (priority: string) => {
 );
   };
 
-  const displayedTasks = tasks.filter((task) => {
-  if (filter === 'Pending') return !task.completed;
-  if (filter === 'Completed') return task.completed;
-  return true;
-});
+ const priorityValue = (priority: string) => {
+  if (priority === 'High') return 3;
+  if (priority === 'Medium') return 2;
+  return 1;
+};
+
+const displayedTasks = [...tasks]
+  .filter((task) => {
+    if (filter === 'Pending') return !task.completed;
+    if (filter === 'Completed') return task.completed;
+    return true;
+  })
+  .sort((a, b) => {
+    if (sortBy === 'Priority') {
+      return priorityValue(b.priority) - priorityValue(a.priority);
+    }
+
+    if (sortBy === 'Due Date') {
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    }
+
+    if (sortBy === 'Oldest') {
+      return Number(a.id) - Number(b.id);
+    }
+
+    return Number(b.id) - Number(a.id);
+  });
 
   const filteredTasks = tasks.filter(
   (task) =>
@@ -731,6 +755,7 @@ const getPriorityStyle = (priority: string) => {
       alignItems: 'center',
       marginHorizontal: 20,
       marginBottom: 12,
+      zIndex : 1000,
     }}
   >
     <Text
@@ -743,15 +768,100 @@ const getPriorityStyle = (priority: string) => {
       Today&apos;s Tasks
     </Text>
 
+    <View style={{ position: 'relative' }}>
+  <TouchableOpacity
+    onPress={() => setSortDropdownVisible(!sortDropdownVisible)}
+    style={{
+      backgroundColor: theme.card,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+    }}
+  >
     <Text
       style={{
         color: theme.subText,
-        fontSize: 14,
-        fontWeight: '600',
+        fontSize: 11,
+        fontWeight: '800',
+        marginRight: 6,
       }}
     >
-      {pendingTasks} left
+      SORT BY
     </Text>
+
+    <Text
+      style={{
+        color: theme.text,
+        fontSize: 13,
+        fontWeight: '800',
+        marginRight: 6,
+      }}
+    >
+      {sortBy}
+    </Text>
+
+    <FontAwesome name="chevron-down" size={11} color={theme.subText} />
+  </TouchableOpacity>
+
+  {sortDropdownVisible && (
+    <View
+      style={{
+        position: 'absolute',
+        top: 44,
+        right: 0,
+        width: 155,
+        backgroundColor: theme.card,
+        borderRadius: 14,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+        shadowColor: '#000',
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 5 },
+        elevation: 10,
+        zIndex: 999,
+      }}
+    >
+      {(['Newest', 'Oldest', 'Priority', 'Due Date'] as const).map((item) => (
+        <TouchableOpacity
+          key={item}
+          onPress={() => {
+            setSortBy(item);
+            setSortDropdownVisible(false);
+          }}
+          style={{
+            paddingVertical: 11,
+            paddingHorizontal: 14,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            style={{
+              color: sortBy === item ? '#208AEF' : theme.text,
+              fontSize: 14,
+              fontWeight: sortBy === item ? '900' : '700',
+            }}
+          >
+            {item}
+          </Text>
+
+          {sortBy === item && (
+            <FontAwesome name="check" size={14} color="#208AEF" />
+          )}
+        </TouchableOpacity>
+      ))}
+    </View>
+  )}
+</View>  
+
+
   </View>
 
   <View
@@ -886,6 +996,7 @@ const getPriorityStyle = (priority: string) => {
         </Text>
         </TouchableOpacity>
       </View>
+
       {/*Search Modal*/ } 
       <Modal
   visible={searchVisible}
