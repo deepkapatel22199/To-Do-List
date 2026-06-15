@@ -1,14 +1,14 @@
 {
   "expo": {
     "name": "NextTask : Prioritize Your Day",
-    "slug": "nexttask : prioritize your day",
-    "version": "1.0.0",
+    "slug": "TodoListApp",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon.png",
-    "scheme": "nexttask : prioritize your day",
+    "scheme": "nexttask",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.deepkapatel.nexttask",
+      "bundleIdentifier": "com.deepkapatel.nexttask:prioritizeyourday",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -21,7 +21,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.deepkapatel.TodoListApp"
+      "package": "com.deepkapatel.nexttask"
     },
     "web": {
       "output": "static",

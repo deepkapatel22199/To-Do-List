@@ -192,76 +192,162 @@ useFocusEffect(
     );
   }
 
-  const renderTaskItem = ({ item }: { item: Task }) => (
-  <View
-    style={{
-      backgroundColor: theme.card,
-      padding: 18,
-      borderRadius: 18,
-      marginBottom: 16,
-      borderWidth: 1,
-      borderColor: isDarkMode ? '#444' : '#ccc',
-      shadowColor: '#000',
-      shadowOpacity: 0.08,
-      shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 4,
-    }}
-  >
-    <Text
-      style={{
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: theme.text,
-        textDecorationLine: item.completed ? 'line-through' : 'none',
-        opacity: item.completed ? 0.55 : 1,
-      }}
-    >
-      {item.title}
-    </Text>
-    
-    <Text 
-      style={{ 
-        color: theme.subText, 
-        marginTop: 6,
-        fontSize:15, 
-        }}
-      >
-        {item.description}
-    </Text>
-        {item.subTasks && item.subTasks.length > 0 && (
-  <View style={{ marginTop: 12 }}>
-    {item.subTasks.map((sub) => (
-      <TouchableOpacity
-        key={sub.id}
-        onPress={() => toggleSubTask(item.id, sub.id)}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 8,
-        }}
-      >
-        <FontAwesome
-          name={sub.completed ? 'circle' : 'circle-o'}
-          size={17}
-          color={sub.completed ? '#208AEF' : theme.subText}
-        />
+  const formatDueDate = (date: string) => {
+  if (!date) return 'No due date';
 
-        <Text
-          style={{
-            color: sub.completed ? theme.subText : theme.text,
-            marginLeft: 10,
-            fontSize: 14,
-            textDecorationLine: sub.completed ? 'line-through' : 'none',
-            flex: 1,
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'No due date';
+
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
+const getPriorityStyle = (priority: string) => {
+  if (priority === 'High') {
+    return {
+      bg: '#FEE2E2',
+      text: '#B91C1C',
+      icon: '#EF4444',
+    };
+  }
+
+  if (priority === 'Medium') {
+    return {
+      bg: '#FEF3C7',
+      text: '#92400E',
+      icon: '#F59E0B',
+    };
+  }
+
+  return {
+    bg: '#DCFCE7',
+    text: '#166534',
+    icon: '#22C55E',
+  };
+};
+
+  const renderTaskItem = ({ item }: { item: Task }) => {
+    const priorityStyle = getPriorityStyle(item.priority);
+    return (
+      <View
+        style={{
+          backgroundColor: theme.card,
+          padding: 18,
+          borderRadius: 22,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+          shadowColor: '#000',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 5 },
+          elevation: 4,
+        }}
+      >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View 
+            style={{ 
+              flex: 1, 
+              paddingRight: 10 
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 19,
+                fontWeight: '800',
+                color: theme.text,
+                textDecorationLine: item.completed ? 'line-through' : 'none',
+                opacity: item.completed ? 0.55 : 1,
+              }}
+            >
+              {item.title}
+            </Text>
+            {item.description ? (
+            <Text 
+              style={{ 
+                color: theme.subText, 
+                marginTop: 6,
+                fontSize:15, 
+                lineHeight: 20,
+              }}
+            >
+              {item.description}
+            </Text>
+            ) : null }
+          </View>
+          {/* Priority Badges */  }
+          <View
+            style={{
+              backgroundColor: priorityStyle.bg,
+              paddingVertical: 7,
+              paddingHorizontal: 11,
+              borderRadius: 20,
+              height : 34,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <FontAwesome
+              name="circle"
+              size={9}
+              color={priorityStyle.icon}
+            />
+            <Text
+            style={{
+              color: priorityStyle.text,
+              fontWeight: 'bold',
+              fontSize: 13,
+              paddingLeft: 6,
+              }}
+            >
+              {item.priority}
+            </Text>
+          </View>
+        </View>
+        {/* Subtasks field */}
+        {item.subTasks && item.subTasks.length > 0 && (
+        <View 
+          style={{ 
+            marginTop: 14, 
+            backgroundColor: isDarkMode ? '#111827' : '#F8FAFC',
+            borderRadius: 14,
+            padding: 12,
           }}
         >
-          {sub.text}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-)}
+          {item.subTasks.map((sub) => (
+          <TouchableOpacity
+            key={sub.id}
+            onPress={() => toggleSubTask(item.id, sub.id)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <FontAwesome
+              name={sub.completed ? 'check-circle' : 'circle-o'}
+              size={17}
+              color={sub.completed ? '#208AEF' : theme.subText}
+            />
+
+            <Text
+              style={{
+                color: sub.completed ? theme.subText : theme.text,
+                marginLeft: 10,
+                fontSize: 14,
+                textDecorationLine: sub.completed ? 'line-through' : 'none',
+                flex: 1,
+              }}
+            >
+              {sub.text}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    )}
 
     {/*Badges*/ }
     <View
@@ -271,54 +357,11 @@ useFocusEffect(
         marginTop: 14,
       }}
     > 
-        {/* Priority Badges */  }
-      <View
-        style={{
-          backgroundColor:
-            item.priority === 'High'
-            ? '#FFE5E5'
-            : item.priority === 'Medium'
-            ? '#FFF4CC'
-            : '#E6F8E6',
-          paddingVertical: 7,
-          paddingHorizontal: 12,
-          borderRadius: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-        }}
-      >
-        <FontAwesome
-          name="circle"
-          size={20}
-          color={
-            item.priority === 'High'
-              ? '#E53935'
-              : item.priority === 'Medium'
-              ? '#F9A825'
-              : '#2E7D32'
-            }
-        />
-        <Text
-          style={{
-            color:
-              item.priority === 'High'
-              ? '#C62828'
-              : item.priority === 'Medium'
-              ? '#B8860B'
-              : '#2E7D32',
-            fontWeight: 'bold',
-            fontSize: 13,
-            paddingLeft: 6,
-          }}
-        >
-          {item.priority} Priority 
-        </Text>
-      </View>
+       
         {/* Status Badge */ }
       <View
         style={{
-          backgroundColor: item.completed ? '#E6F8E6' : '#FFF4CC',
+          backgroundColor: item.completed ? '#DCFCE7' : '#FEF3C7',
           paddingVertical: 7,
           paddingHorizontal: 12,
           borderRadius: 20,
@@ -330,12 +373,12 @@ useFocusEffect(
       <FontAwesome
           name={item.completed ? 'check-square' : 'hourglass-half'}
           size={14}
-          color={item.completed ? '#2E7D32' : '#B8860B'}
+          color={item.completed ? '#166534' : '#92400E'}
         />
       <Text
         style={{
-          color: item.completed ? '#2E7D32': '#B8860B',
-          fontWeight: 'bold',
+          color: item.completed ? '#166534' : '#92400E',
+          fontWeight: '800',
           fontSize: 13,
           paddingLeft: 6,
         }}
@@ -346,7 +389,7 @@ useFocusEffect(
       {/* Due Date Badge */ }
     <View
       style={{
-        backgroundColor: '#E3F2FD',
+        backgroundColor: isDarkMode ? '#1E3A5F' : '#E3F2FD',
         paddingVertical: 7,
         paddingHorizontal: 12,
         borderRadius: 20,
@@ -354,16 +397,16 @@ useFocusEffect(
         alignItems: 'center',
       }}
     >
-      <FontAwesome name="calendar" size={14} color="#1565C0" />
+      <FontAwesome name="calendar" size={14} color="#208AEF" />
     <Text
       style={{
-        color: '#1565C0',
-        fontWeight: 'bold',
-        fontSize: 13,
-        paddingLeft: 6,
+        color: isDarkMode ? '#BFDBFE' : '#1565C0',
+        fontWeight: '800',
+        fontSize: 12,
+        marginLeft: 6,
       }}
     >
-      {new Date(item.dueDate).toLocaleDateString()}
+      {formatDueDate(item.dueDate)}
     </Text>
   </View>
 </View>
@@ -373,7 +416,7 @@ useFocusEffect(
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-         borderTopWidth: 1,
+        borderTopWidth: 1,
         borderTopColor: isDarkMode ? '#263445' : '#E5E7EB',
         marginTop: 16,
         paddingTop: 14,
@@ -387,12 +430,12 @@ useFocusEffect(
     <FontAwesome
       name={item.completed ? 'undo' : 'check-circle'}
       size={17}
-      color={item.completed ? 'green' : '#208AEF'}
+      color={item.completed ? '#22C55E' : '#208AEF'}
     />
       <Text 
         style={{ 
-          color: item.completed ? 'green' : '#208AEF', 
-          fontWeight: 'bold', 
+          color: item.completed ? '#22C55E' : '#208AEF', 
+          fontWeight: '800', 
           paddingLeft: 6,
         }}
       >
@@ -414,14 +457,15 @@ useFocusEffect(
       onPress={() => deleteTask(item.id)}
       style={{ flexDirection: 'row', alignItems: 'center',  }}
     >
-      <FontAwesome name="trash" size={17} color="red" />
-      <Text style={{ color: 'red', fontWeight: 'bold', paddingLeft: 6 }}>
+      <FontAwesome name="trash" size={17} color="#EF4444" />
+      <Text style={{ color: '#EF4444', fontWeight: '800', paddingLeft: 6 }}>
         Delete
       </Text>
     </TouchableOpacity>
   </View>
   </View>
 );
+  };
 
   const displayedTasks = tasks.filter((task) => {
   if (filter === 'Pending') return !task.completed;
@@ -620,54 +664,63 @@ useFocusEffect(
       flexDirection: 'row',
       marginHorizontal: 20,
       marginTop: 20,
-      marginBottom: 15,
+      marginBottom: 18,
     }}
   >
     <View
       style={{
         flex: 1,
         backgroundColor: theme.card,
-        padding: 14,
-        borderRadius: 16,
+        paddingVertical: 16,
+        borderRadius: 18,
         alignItems: 'center',
         marginRight: 10,
+        borderWidth: 1,
+        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
       }}
     >
-      <Text style={{ color: theme.subText, fontSize: 13 }}>Total</Text>
-      <Text style={{ color: theme.text, fontSize: 24, fontWeight: 'bold' }}>
+     
+      <Text style={{ color: theme.text, fontSize: 24, fontWeight: '900' }}>
         {totalTasks}
       </Text>
+       <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Total</Text>
     </View>
 
     <View
       style={{
         flex: 1,
         backgroundColor: theme.card,
-        padding: 14,
-        borderRadius: 16,
+        paddingVertical: 16,
+        borderRadius: 18,
         alignItems: 'center',
         marginRight: 10,
+        borderWidth: 1,
+        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
       }}
     >
-      <Text style={{ color: theme.subText, fontSize: 13 }}>Pending</Text>
-      <Text style={{ color: '#F9A825', fontSize: 24, fontWeight: 'bold' }}>
+      
+      <Text style={{ color: '#F9A825', fontSize: 24, fontWeight: '900' }}>
         {pendingTasks}
       </Text>
+      <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Pending</Text>
     </View>
 
     <View
       style={{
         flex: 1,
         backgroundColor: theme.card,
-        padding: 14,
-        borderRadius: 16,
+        paddingVertical: 16,
+        borderRadius: 18,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
       }}
     >
-      <Text style={{ color: theme.subText, fontSize: 13 }}>Done</Text>
-      <Text style={{ color: '#2E7D32', fontSize: 24, fontWeight: 'bold' }}>
+      
+      <Text style={{ color: '#2E7D32', fontSize: 24, fontWeight: '900' }}>
         {completedTasks}
       </Text>
+      <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Done</Text>
     </View>
   </View>
 
