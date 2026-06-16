@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput, ScrollView} from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity,  Alert, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNav from './bottomNav';
 import SearchModal from './searchModel';
@@ -26,7 +26,7 @@ type Task = {
 
 export default function Index() {
   const { isDarkMode, setIsDarkMode, theme } = useTheme();
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -34,7 +34,7 @@ export default function Index() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
-  const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date' | 'Category'>('Newest');
+  const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date' >('Newest');
   const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
 
 
@@ -70,46 +70,7 @@ export default function Index() {
   setTasks(updatedTasks);
   await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
 };
-
-  const toggleSubTask = async (taskId: string, subTaskId: string) => {
-  const updatedTasks = tasks.map((task) =>
-    task.id === taskId
-      ? {
-          ...task,
-          subTasks: (task.subTasks || []).map((sub) =>
-            sub.id === subTaskId
-              ? { ...sub, completed: !sub.completed }
-              : sub
-          ),
-        }
-      : task
-  );
-
-  setTasks(updatedTasks);
-  await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
-};
-
-  const deleteTask = async (id: string) => {
-  Alert.alert(
-    'Delete Task',
-    'Are you sure you want to delete this task?',
-    [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          const updatedTasks = tasks.filter((task) => task.id !== id);
-          setTasks(updatedTasks);
-          await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
-        },
-      },
-    ]
-  );
-};
+  
 
 useFocusEffect(
   useCallback(() => {
@@ -117,11 +78,11 @@ useFocusEffect(
   }, [])
 );
 
-  useEffect(() => {
-    setTimeout(() => {
-      setShowSplash(false);
-    }, 500);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setShowSplash(false);
+  //   }, 500);
+  // }, []);
 
   useEffect(() => {
   const checkOnboardingStatus = async () => {
@@ -246,17 +207,6 @@ const getPriorityStyle = (priority: string) => {
   };
 };
 
-  const formatTaskTime = (date: string) => {
-  if (!date) return '';
-
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-
-  return d.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
 
 const isToday = (date: Date) => {
   const today = new Date();
@@ -279,16 +229,7 @@ const isTomorrow = (date: Date) => {
   );
 };
 
-  const getSectionTitle = (date: string) => {
-  const d = new Date(date);
-
-  if (isNaN(d.getTime())) return 'Upcoming';
-  if (isToday(d)) return "Today's Tasks";
-  if (isTomorrow(d)) return "Tomorrow's Tasks";
-  if (isTaskOverdue(date, false)) return "Overdue Tasks";
-
-  return 'Upcoming';
-};
+  
 
 
   const renderTaskItem = ({ item }: { item: Task }) => {
@@ -404,10 +345,6 @@ const displayedTasks = [...tasks]
 
     if (sortBy === 'Due Date') {
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-    }
-
-    if (sortBy === 'Category') {
-      return (a.category || 'Other').localeCompare(b.category || 'Other');
     }
 
     if (sortBy === 'Oldest') {
@@ -944,7 +881,7 @@ const firstVisibleSection = taskSections.find(
           zIndex: 9999,
         }}
       >
-        {(['Newest', 'Oldest', 'Priority', 'Due Date', 'Category'] as const).map((item) => (
+        {(['Newest', 'Oldest', 'Priority', 'Due Date'] as const).map((item) => (
           <TouchableOpacity
             key={item}
             onPress={() => {
@@ -1000,42 +937,6 @@ const firstVisibleSection = taskSections.find(
 </View>
 )}
 
-    {/*-------------------------------------NavBar ------------------*/}
-     {/* Floating Add Button */}
-<TouchableOpacity
-  onPress={() => router.push('/addTask')}
-  style={{
-    position: 'absolute',
-    bottom: 95,
-    right: 24,
-
-    backgroundColor: '#208AEF',
-
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    shadowColor: '#208AEF',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-
-    elevation: 12,
-    zIndex: 999,
-  }}
->
-  <FontAwesome
-    name="plus"
-    size={28}
-    color="white"
-  />
-</TouchableOpacity>
 
     {/* Search Model */}
     <SearchModal
