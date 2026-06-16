@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback} from 'react';
 import { router, useFocusEffect} from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput} from 'react-native';
+import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SubTask = {
@@ -16,6 +16,7 @@ type Task = {
   title: string;
   description: string;
   priority: string;
+  category: string;
   dueDate: string;
   completed: boolean;
   subTasks: SubTask[];
@@ -31,7 +32,7 @@ export default function Index() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
-  const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date'>('Newest');
+  const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date' | 'Category'>('Newest');
   const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
 
 
@@ -243,272 +244,143 @@ const getPriorityStyle = (priority: string) => {
   };
 };
 
+  const formatTaskTime = (date: string) => {
+  if (!date) return '';
+
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const isToday = (date: Date) => {
+  const today = new Date();
+
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+};
+
+const isTomorrow = (date: Date) => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return (
+    date.getDate() === tomorrow.getDate() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getFullYear() === tomorrow.getFullYear()
+  );
+};
+
+  const getSectionTitle = (date: string) => {
+  const d = new Date(date);
+
+  if (isNaN(d.getTime())) return 'Upcoming';
+  if (isToday(d)) return "Today's Tasks";
+  if (isTomorrow(d)) return "Tomorrow's Tasks";
+  if (isTaskOverdue(date, false)) return "Overdue Tasks";
+
+  return 'Upcoming';
+};
+
+
   const renderTaskItem = ({ item }: { item: Task }) => {
-    const priorityStyle = getPriorityStyle(item.priority);
-    const overdue = isTaskOverdue(item.dueDate, item.completed);
+  const priorityStyle = getPriorityStyle(item.priority);
 
+  return (
+    <View
+      style={{
+        backgroundColor: theme.card,
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: isDarkMode ? '#263445' : '#E5E7EB',
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <TouchableOpacity onPress={() => toggleCompleteTask(item.id)}>
+          <FontAwesome
+            name={item.completed ? 'check-circle' : 'circle-o'}
+            size={22}
+            color={item.completed ? '#22C55E' : '#CBD5E1'}
+          />
+        </TouchableOpacity>
 
-    return (
-      <View
-        style={{
-          backgroundColor: theme.card,
-          padding: 18,
-          borderRadius: 22,
-          marginBottom: 16,
-          borderWidth: 1,
-          borderColor: isDarkMode ? '#263445' : '#E5E7EB',
-          shadowColor: '#000',
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 5 },
-          elevation: 4,
-        }}
-      >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <View 
-            style={{ 
-              flex: 1, 
-              paddingRight: 10 
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 15,
+              fontWeight: '900',
+              textDecorationLine: item.completed ? 'line-through' : 'none',
             }}
           >
+            {item.title}
+          </Text>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+            <FontAwesome name="calendar-o" size={11} color={theme.subText} />
+
             <Text
               style={{
-                fontSize: 19,
-                fontWeight: '800',
-                color: theme.text,
-                textDecorationLine: item.completed ? 'line-through' : 'none',
-                opacity: item.completed ? 0.55 : 1,
+                color: theme.subText,
+                fontSize: 11,
+                fontWeight: '700',
+                marginLeft: 5,
               }}
             >
-              {item.title}
+              {formatDueDate(item.dueDate)}
             </Text>
-            {item.description ? (
-            <Text 
-              style={{ 
-                color: theme.subText, 
-                marginTop: 6,
-                fontSize:15, 
-                lineHeight: 20,
-              }}
-            >
-              {item.description}
-            </Text>
-            ) : null }
-          </View>
-          {/* Priority Badges */  }
-          <View
-            style={{
-              backgroundColor: priorityStyle.bg,
-              paddingVertical: 7,
-              paddingHorizontal: 11,
-              borderRadius: 20,
-              height : 34,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            <FontAwesome
-              name="circle"
-              size={9}
-              color={priorityStyle.icon}
-            />
+
+            <Text style={{ color: theme.subText, marginHorizontal: 7 }}>|</Text>
+
             <Text
-            style={{
-              color: priorityStyle.text,
-              fontWeight: 'bold',
-              fontSize: 13,
-              paddingLeft: 6,
+              style={{
+                color: '#208AEF',
+                fontSize: 11,
+                fontWeight: '900',
               }}
             >
-              {item.priority}
+              {item.category || 'Other'}
             </Text>
           </View>
         </View>
-        {/* Subtasks field */}
-        {item.subTasks && item.subTasks.length > 0 && (
-        <View 
-          style={{ 
-            marginTop: 14, 
-            backgroundColor: isDarkMode ? '#121212' : '#F8FAFC',
-            borderRadius: 14,
-            padding: 12,
-          }}
-        >
-          {item.subTasks.map((sub) => (
-          <TouchableOpacity
-            key={sub.id}
-            onPress={() => toggleSubTask(item.id, sub.id)}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 8,
-            }}
-          >
-            <FontAwesome
-              name={sub.completed ? 'check-circle' : 'circle-o'}
-              size={17}
-              color={sub.completed ? '#208AEF' : theme.subText}
-            />
+              <TouchableOpacity
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: priorityStyle.bg,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+  }}
+>
+  <FontAwesome
+    name="flag"
+    size={12}
+    color={priorityStyle.icon}
+  />
 
-            <Text
-              style={{
-                color: sub.completed ? theme.subText : theme.text,
-                marginLeft: 10,
-                fontSize: 14,
-                textDecorationLine: sub.completed ? 'line-through' : 'none',
-                flex: 1,
-              }}
-            >
-              {sub.text}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    )}
-
-    {/*Badges*/ }
-    <View
-       style={{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop: 14,
-      }}
-    > 
-    {/* Overdue Badge */}
-      {overdue && (
-  <View
+  <Text
     style={{
-          backgroundColor: '#FEE2E2',
-          paddingVertical: 7,
-          paddingHorizontal: 12,
-          borderRadius: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-        }}
+      color: priorityStyle.text,
+      fontSize: 11,
+      fontWeight: '900',
+      marginLeft: 6,
+    }}
   >
-    <FontAwesome name="exclamation-circle" size={14} color="#DC2626" />
-    <Text
-      style={{
-        color: '#B91C1C',
-        fontWeight: '900',
-        fontSize: 12,
-        marginLeft: 6,
-      }}
-    >
-      OVERDUE
-    </Text>
-  </View>
-)}
-       
-        {/* Status Badge */ }
-      <View
-        style={{
-          backgroundColor: item.completed ? '#DCFCE7' : '#FEF3C7',
-          paddingVertical: 7,
-          paddingHorizontal: 12,
-          borderRadius: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-        }}
-      >
-      <FontAwesome
-          name={item.completed ? 'check-square' : 'hourglass-half'}
-          size={14}
-          color={item.completed ? '#166534' : '#92400E'}
-        />
-      <Text
-        style={{
-          color: item.completed ? '#166534' : '#92400E',
-          fontWeight: '800',
-          fontSize: 13,
-          paddingLeft: 6,
-        }}
-      >
-        {item.completed ? 'Completed' : 'Pending'}
-      </Text>
+    {item.priority}
+  </Text>
+</TouchableOpacity>
+      </View>
     </View>
-      {/* Due Date Badge */ }
-    <View
-      style={{
-        backgroundColor: isDarkMode ? '#1E3A5F' : '#E3F2FD',
-        paddingVertical: 7,
-        paddingHorizontal: 12,
-        borderRadius: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}
-    >
-      <FontAwesome name="calendar" size={14} color="#208AEF" />
-    <Text
-      style={{
-        color: isDarkMode ? '#BFDBFE' : '#1565C0',
-        fontWeight: '800',
-        fontSize: 12,
-        marginLeft: 6,
-      }}
-    >
-      {formatDueDate(item.dueDate)}
-    </Text>
-  </View>
-</View>
-      {/* Action Buttons */}
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: isDarkMode ? '#263445' : '#E5E7EB',
-        marginTop: 16,
-        paddingTop: 14,
-      }}
-    >
-      {/*Complete/Undo Button*/ }
-    <TouchableOpacity 
-      onPress={() => toggleCompleteTask(item.id)}
-      style={{ flexDirection: 'row', alignItems: 'center' }}
-    >
-    <FontAwesome
-      name={item.completed ? 'undo' : 'check-circle'}
-      size={17}
-      color={item.completed ? '#22C55E' : '#208AEF'}
-    />
-      <Text 
-        style={{ 
-          color: item.completed ? '#22C55E' : '#208AEF', 
-          fontWeight: '800', 
-          paddingLeft: 6,
-        }}
-      >
-        {item.completed ? 'Undo' : ' Complete'}
-      </Text>
-    </TouchableOpacity>
-        {/*Edit Button*/ }
-    <TouchableOpacity 
-      onPress={() => router.push(`/addTask?id=${item.id}`)}
-      style={{ flexDirection: 'row', alignItems: 'center',  }}
-    >
-      <FontAwesome name="pencil" size={17} color="#208AEF" />
-      <Text style={{ color: '#208AEF', fontWeight: 'bold', paddingLeft: 6 }}>
-        Edit
-      </Text>
-    </TouchableOpacity>
-        {/*Delete Button*/ }
-    <TouchableOpacity 
-      onPress={() => deleteTask(item.id)}
-      style={{ flexDirection: 'row', alignItems: 'center',  }}
-    >
-      <FontAwesome name="trash" size={17} color="#EF4444" />
-      <Text style={{ color: '#EF4444', fontWeight: '800', paddingLeft: 6 }}>
-        Delete
-      </Text>
-    </TouchableOpacity>
-  </View>
-  </View>
-);
-  };
+  );
+};
 
  const priorityValue = (priority: string) => {
   if (priority === 'High') return 3;
@@ -531,12 +403,82 @@ const displayedTasks = [...tasks]
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     }
 
+    if (sortBy === 'Category') {
+      return (a.category || 'Other').localeCompare(b.category || 'Other');
+    }
+
     if (sortBy === 'Oldest') {
       return Number(a.id) - Number(b.id);
     }
 
     return Number(b.id) - Number(a.id);
   });
+
+  type TaskSection = "Today's Tasks" | "Tomorrow's Tasks" | "Upcoming" | "Overdue";
+
+const taskSections: TaskSection[] = [
+  "Today's Tasks",
+  "Tomorrow's Tasks",
+  "Upcoming",
+  "Overdue",
+];
+
+
+const groupedTasks: Record<TaskSection, Task[]> = {
+  "Today's Tasks": [],
+  "Tomorrow's Tasks": [],
+  Upcoming: [],
+  Overdue: [],
+};
+
+displayedTasks.forEach((task) => {
+  if (!task.dueDate) {
+    groupedTasks.Upcoming.push(task);
+    return;
+  }
+
+  const due = new Date(task.dueDate);
+
+  if (isNaN(due.getTime())) {
+    groupedTasks.Upcoming.push(task);
+    return;
+  }
+
+  const today = new Date();
+
+  const dueOnlyDate = new Date(
+    due.getFullYear(),
+    due.getMonth(),
+    due.getDate()
+  );
+
+  const todayOnlyDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  if (!task.completed && dueOnlyDate < todayOnlyDate) {
+    groupedTasks.Overdue.push(task);
+    return;
+  }
+
+  if (isToday(due)) {
+    groupedTasks["Today's Tasks"].push(task);
+    return;
+  }
+
+  if (isTomorrow(due)) {
+    groupedTasks["Tomorrow's Tasks"].push(task);
+    return;
+  }
+
+  groupedTasks.Upcoming.push(task);
+});
+
+const firstVisibleSection = taskSections.find(
+  (section) => groupedTasks[section].length > 0
+);
 
   const filteredTasks = tasks.filter(
   (task) =>
@@ -830,6 +772,7 @@ const displayedTasks = [...tasks]
 </View>
 </View>
 </View>
+    {/*---------------------- counter --------------------------*/}
   <View
     style={{
       flexDirection: 'row',
@@ -895,122 +838,7 @@ const displayedTasks = [...tasks]
     </View>
   </View>
 
-  <View
-    style={{
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginHorizontal: 20,
-      marginBottom: 12,
-      zIndex : 1000,
-    }}
-  >
-    <Text
-      style={{
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: theme.text,
-      }}
-    >
-      Today&apos;s Tasks
-    </Text>
-
-    <View style={{ position: 'relative' }}>
-  <TouchableOpacity
-    onPress={() => setSortDropdownVisible(!sortDropdownVisible)}
-    style={{
-      backgroundColor: theme.card,
-      borderWidth: 1,
-      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 14,
-      flexDirection: 'row',
-      alignItems: 'center',
-    }}
-  >
-    <Text
-      style={{
-        color: theme.subText,
-        fontSize: 11,
-        fontWeight: '800',
-        marginRight: 6,
-      }}
-    >
-      SORT BY
-    </Text>
-
-    <Text
-      style={{
-        color: theme.text,
-        fontSize: 13,
-        fontWeight: '800',
-        marginRight: 6,
-      }}
-    >
-      {sortBy}
-    </Text>
-
-    <FontAwesome name="chevron-down" size={11} color={theme.subText} />
-  </TouchableOpacity>
-
-  {sortDropdownVisible && (
-    <View
-      style={{
-        position: 'absolute',
-        top: 44,
-        right: 0,
-        width: 155,
-        backgroundColor: theme.card,
-        borderRadius: 14,
-        paddingVertical: 8,
-        borderWidth: 1,
-        borderColor: isDarkMode ? '#334155' : '#E5E7EB',
-        shadowColor: '#000',
-        shadowOpacity: 0.18,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 5 },
-        elevation: 10,
-        zIndex: 999,
-      }}
-    >
-      {(['Newest', 'Oldest', 'Priority', 'Due Date'] as const).map((item) => (
-        <TouchableOpacity
-          key={item}
-          onPress={() => {
-            setSortBy(item);
-            setSortDropdownVisible(false);
-          }}
-          style={{
-            paddingVertical: 11,
-            paddingHorizontal: 14,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Text
-            style={{
-              color: sortBy === item ? '#208AEF' : theme.text,
-              fontSize: 14,
-              fontWeight: sortBy === item ? '900' : '700',
-            }}
-          >
-            {item}
-          </Text>
-
-          {sortBy === item && (
-            <FontAwesome name="check" size={14} color="#208AEF" />
-          )}
-        </TouchableOpacity>
-      ))}
-    </View>
-  )}
-</View>  
-
-
-  </View>
-
+      {/*------------------------------------- filter All , pending , completed ---------------------------------------*/}
   <View
   style={{
     flexDirection: 'row',
@@ -1044,17 +872,141 @@ const displayedTasks = [...tasks]
     </TouchableOpacity>
   ))}
 </View>
+  {/*----------------------------------------------- sort by section -------------------------------------*/}
+  <ScrollView
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={{
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+  }}
+>
+ {taskSections.map((sectionTitle) => {
+  const sectionTasks = groupedTasks[sectionTitle] || [];
 
-  <FlatList
-    data={displayedTasks}
-    keyExtractor={(item) => item.id}
-    contentContainerStyle={{
-      paddingHorizontal: 20,
-      paddingBottom: 120,
-    }}
-    renderItem={renderTaskItem}
-    showsVerticalScrollIndicator={false}
-  />
+  if (sectionTasks.length === 0) {
+    return null;
+  }
+
+  return (
+    <View
+  key={sectionTitle}
+  style={{
+    marginBottom: 18,
+    zIndex: sectionTitle === firstVisibleSection ? 1000 : 1,
+  }}
+>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 10,
+          zIndex: 1000,
+        }}
+      >
+        <Text
+          style={{
+            color: sectionTitle === 'Overdue' ? '#EF4444' : theme.text,
+            fontSize: 18,
+            fontWeight: '900',
+          }}
+        >
+          {sectionTitle}
+        </Text>
+
+        {sectionTitle === firstVisibleSection && (
+  <View style={{ position: 'relative' }}>
+    <TouchableOpacity
+      onPress={() => setSortDropdownVisible(!sortDropdownVisible)}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ color: theme.subText, fontSize: 12, fontWeight: '800', marginRight: 6 }}>
+        Sort By
+      </Text>
+
+      <Text style={{ color: theme.text, fontSize: 13, fontWeight: '900', marginRight: 4 }}>
+        {sortBy}
+      </Text>
+
+      <FontAwesome name="chevron-down" size={10} color={theme.subText} />
+    </TouchableOpacity>
+
+    {sortDropdownVisible && (
+      <View
+        style={{
+          position: 'absolute',
+          top: 28,
+          right: 0,
+          width: 155,
+          backgroundColor: theme.card,
+          borderRadius: 14,
+          paddingVertical: 8,
+          borderWidth: 1,
+          borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+          shadowColor: '#000',
+          shadowOpacity: 0.18,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 5 },
+          elevation: 20,
+          zIndex: 9999,
+        }}
+      >
+        {(['Newest', 'Oldest', 'Priority', 'Due Date', 'Category'] as const).map((item) => (
+          <TouchableOpacity
+            key={item}
+            onPress={() => {
+              setSortBy(item);
+              setSortDropdownVisible(false);
+            }}
+            style={{
+              paddingVertical: 11,
+              paddingHorizontal: 14,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: sortBy === item ? '#208AEF' : theme.text,
+                fontSize: 14,
+                fontWeight: sortBy === item ? '900' : '700',
+              }}
+            >
+              {item}
+            </Text>
+
+            {sortBy === item && (
+              <FontAwesome name="check" size={14} color="#208AEF" />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    )}
+  </View>
+)}
+      </View>
+ {/* ------------------------------------------------*/}
+      <View
+        style={{
+          backgroundColor: theme.card,
+          borderRadius: 18,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+        }}
+      >
+        {sectionTasks.map((task: Task) => (
+          <View key={task.id}>{renderTaskItem({ item: task })}</View>
+        ))}
+      </View>
+    </View>
+  );
+})}
+</ScrollView>
 </View>
 )}
      <View

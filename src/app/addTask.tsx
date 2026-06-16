@@ -480,7 +480,7 @@ export default function AddTask() {
   </View>
 
   <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-    {['Work', 'Personal', 'Study', 'Shopping'].map((item) => (
+    {['Work', 'Personal', 'Study', 'Shopping', 'Health', 'Other'].map((item) => (
       <TouchableOpacity
         key={item}
         onPress={() => setCategory(item)}
@@ -508,8 +508,6 @@ export default function AddTask() {
     ))}
   </View>
 </View>
-
-
   {/* Reminder Placeholder */}
   <View
     style={{
