@@ -5,6 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import BottomNav from './bottomNav';
+import SearchModal from './searchModel';
 
 type Task = {
   id: string;
@@ -20,6 +21,7 @@ type Task = {
 export default function Statistics() {
   const { theme, isDarkMode } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [searchVisible, setSearchVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -96,9 +98,9 @@ const bestStreak = currentStreak;
             Statistics
           </Text>
 
-          <TouchableOpacity onPress={() => router.back()}>
-            <FontAwesome name="search" size={22} color="white" />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSearchVisible(true)}>
+                <FontAwesome name="search" size={22} color="white" />
+            </TouchableOpacity>
         </View>
       </View>
 
@@ -210,6 +212,10 @@ const bestStreak = currentStreak;
         </View>
       </ScrollView>
       <BottomNav active="Stats" />
+      <SearchModal
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+    />
     </View>
   );
 }

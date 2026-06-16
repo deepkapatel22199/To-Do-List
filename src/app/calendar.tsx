@@ -7,6 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import BottomNav from './bottomNav';
 
+import SearchModal from './searchModel';
 type Task = {
   id: string;
   title: string;
@@ -20,12 +21,14 @@ type Task = {
 export default function CalendarScreen() {
   const { theme, isDarkMode } = useTheme();
 
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [calendarView, setCalendarView] = useState<'Month' | 'Week'>('Month');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
   const [weekStartDate, setWeekStartDate] = useState(selectedDate);
+  const [searchVisible, setSearchVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -165,7 +168,7 @@ export default function CalendarScreen() {
           borderBottomRightRadius: 24,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent:'space-between' }}>
           <Text
             style={{
               color: 'white',
@@ -176,6 +179,9 @@ export default function CalendarScreen() {
           >
             Calendar
           </Text>
+          <TouchableOpacity onPress={() => setSearchVisible(true)}>
+            <FontAwesome name="search" size={22} color="white" />
+        </TouchableOpacity>
         </View>
       </View>
 
@@ -554,6 +560,10 @@ export default function CalendarScreen() {
         />
       </View>
       <BottomNav active="Calendar"/>
+      <SearchModal
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+    />
     </View>
   );
 }

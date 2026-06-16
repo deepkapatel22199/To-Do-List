@@ -7,7 +7,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 type Task = {
   id: string;
   title: string;

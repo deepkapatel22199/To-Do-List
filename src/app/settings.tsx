@@ -3,9 +3,12 @@ import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import BottomNav from './bottomNav';
+import SearchModal from './searchModel';
+import { useState } from 'react';
 
 export default function Settings() {
-  const { theme, isDarkMode, setIsDarkMode } = useTheme();
+    const { theme, isDarkMode, setIsDarkMode } = useTheme();
+    const [searchVisible, setSearchVisible] = useState(false);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -21,11 +24,12 @@ export default function Settings() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ color: 'white', fontSize: 24, fontWeight: '900' }}>
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: '900' }}>
             Settings
-          </Text>
-
-          <FontAwesome name="search" size={22} color="white" />
+        </Text>
+        <TouchableOpacity onPress={() => setSearchVisible(true)}>
+            <FontAwesome name="search" size={22} color="white" />
+        </TouchableOpacity>
         </View>
       </View>
 
@@ -114,6 +118,10 @@ export default function Settings() {
         </View>
       </ScrollView>
       <BottomNav active="Settings" />
+      <SearchModal
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+    />
     </View>
   );
 }
