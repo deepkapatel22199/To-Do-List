@@ -293,7 +293,8 @@ const isTomorrow = (date: Date) => {
   const priorityStyle = getPriorityStyle(item.priority);
 
   return (
-    <View
+    <TouchableOpacity
+      onPress={() => router.push(`/taskDetail?id=${item.id}`)}
       style={{
         backgroundColor: theme.card,
         paddingVertical: 14,
@@ -378,7 +379,7 @@ const isTomorrow = (date: Date) => {
   </Text>
 </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -458,10 +459,12 @@ displayedTasks.forEach((task) => {
     today.getDate()
   );
 
-  if (!task.completed && dueOnlyDate < todayOnlyDate) {
-    groupedTasks.Overdue.push(task);
-    return;
-  }
+const now = new Date();
+
+if (!task.completed && due.getTime() < now.getTime()) {
+  groupedTasks.Overdue.push(task);
+  return;
+}
 
   if (isToday(due)) {
     groupedTasks["Today's Tasks"].push(task);
