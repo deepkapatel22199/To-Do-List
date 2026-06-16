@@ -5,6 +5,7 @@ import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import BottomNav from './bottomNav';
 
 type Task = {
   id: string;
@@ -165,10 +166,6 @@ export default function CalendarScreen() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <FontAwesome name="chevron-left" size={22} color="white" />
-          </TouchableOpacity>
-
           <Text
             style={{
               color: 'white',
@@ -556,6 +553,7 @@ export default function CalendarScreen() {
           }
         />
       </View>
+      <BottomNav active="Calendar"/>
     </View>
   );
 }

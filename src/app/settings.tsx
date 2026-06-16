@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView, Switch, Alert } from 'react-n
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import BottomNav from './bottomNav';
 
 export default function Settings() {
   const { theme, isDarkMode, setIsDarkMode } = useTheme();
@@ -108,10 +109,11 @@ export default function Settings() {
             value="v1.0.0"
             color="#64748B"
             theme={theme}
-            onPress={() => Alert.alert('NextTask', 'Version 1.0.0\nCreated by Deep Ka Patel')}
+            onPress={() => Alert.alert('NextTask', 'Version 1.0.0')}
           />
         </View>
       </ScrollView>
+      <BottomNav active="Settings" />
     </View>
   );
 }
@@ -165,5 +167,6 @@ function SettingRow({ icon, title, value, color, theme, children, onPress }: any
         </View>
       )}
     </TouchableOpacity>
+    
   );
 }

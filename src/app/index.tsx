@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { View, Text, ActivityIndicator, Image , TouchableOpacity, FlatList, Alert, Modal, TextInput, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomNav from './bottomNav';
 
 type SubTask = {
   id: string;
@@ -1051,75 +1052,7 @@ const firstVisibleSection = taskSections.find(
 </TouchableOpacity>
 
 {/* Bottom Footer */}
-<View
-  style={{
-    position: 'absolute',
-    bottom: 18,
-    left: 18,
-    right: 18,
-    height: 76,
-    borderRadius: 28,
-    backgroundColor: theme.card,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    elevation: 8,
-  }}
->
-  <TouchableOpacity 
-     style={{
-      flex: 1,
-      alignItems: 'center',
-    }}
-  >
-    <FontAwesome name="home" size={25} color="#208AEF" />
-    <Text style={{ color: '#208AEF', fontSize: 12, fontWeight: '800', marginTop: 4 }}>
-      Home
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    onPress={() => router.push('/statistics')}
-     style={{
-    flex: 1,
-    alignItems: 'center',
-  }}
-  >
-    <FontAwesome name="bar-chart" size={24} color={theme.icon} />
-    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
-      Stats
-    </Text>
-  </TouchableOpacity>
-
-
-  <TouchableOpacity
-    onPress={() => router.push('/calendar')}
-    style={{ alignItems: 'center', flex: 1 }}
-  >
-    <FontAwesome name="calendar" size={24} color={theme.icon} />
-    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
-      Calendar
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    onPress={() => router.push('/settings')}
-    style={{ alignItems: 'center', flex: 1 }}
-  >
-    <FontAwesome name="cog" size={25} color={theme.icon} />
-    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
-      Settings
-    </Text>
-  </TouchableOpacity>
-</View>
+    <BottomNav active="Home" />
 
       {/*Search Modal*/ } 
       <Modal

@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import BottomNav from './bottomNav';
 
 type Task = {
   id: string;
@@ -208,6 +209,7 @@ const bestStreak = currentStreak;
           <StreakBox title="Best Streak" value={`${bestStreak} Days`} icon="trophy" color="#F59E0B" theme={theme} isDarkMode={isDarkMode} />
         </View>
       </ScrollView>
+      <BottomNav active="Stats" />
     </View>
   );
 }
@@ -275,6 +277,7 @@ function StreakBox({ title, value, icon, color, theme, isDarkMode }: any) {
       <Text style={{ color: theme.text, fontSize: 22, fontWeight: '900', marginTop: 4 }}>
         {value}
       </Text>
-    </View>
+      
+        </View>
   );
 }
