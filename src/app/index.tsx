@@ -1012,92 +1012,114 @@ const firstVisibleSection = taskSections.find(
 </ScrollView>
 </View>
 )}
-     <View
-        style={{
-          position: 'absolute',
-          bottom: 25,
-          left: 24,
-          right: 24,
-          height: 76,
-          borderRadius: 28,
-          backgroundColor: theme.card,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: 28,
-          shadowColor: '#000',
-          shadowOpacity: 0.12,
-          shadowRadius: 12,
-          shadowOffset: {
-            width: 0,
-            height: 5,
-          },
-          elevation: 8,
-        }}
-      >
-        {/*Home Button*/ }
-        <TouchableOpacity
-          style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          }}
-        >
-          <FontAwesome name="home" size={30} color={theme.icon} />
-          <Text
-            style={{
-              fontSize: 15,
-              color: theme.icon,
-              fontWeight: '600',
-              marginTop: 4,
-            }}
-          >
-          Home
-        </Text>
-        </TouchableOpacity>
-        
-          {/*Add Task Button*/ }
-        <TouchableOpacity
-          onPress={() => router.push('/addTask')}
-          style={{
-            backgroundColor: theme.plus,
-            width: 68,
-            height: 68,
-            borderRadius: 34,
-            justifyContent: 'center',
-            alignItems: 'center',
-            shadowColor: theme.plus,
-            shadowOpacity: 0.35,
-            shadowRadius: 10,
-            shadowOffset: {
-              width: 0,
-              height: 5,
-            },
-            elevation: 10,
-          }}
-        >
-          <FontAwesome name="plus" size={30} color="white" />
-        </TouchableOpacity>
-          {/*Search Button*/ }
-        <TouchableOpacity
-          onPress={() => setSearchVisible(true)}
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-        <FontAwesome name="search" size={30} color={theme.icon} />
-        <Text
-          style={{
-            fontSize: 15,
-            color: theme.icon,
-            fontWeight: '600',
-            marginTop: 4,
-          }}
-        >
-          Search
-        </Text>
-        </TouchableOpacity>
-      </View>
+
+    {/*-------------------------------------NavBar ------------------*/}
+     {/* Floating Add Button */}
+<TouchableOpacity
+  onPress={() => router.push('/addTask')}
+  style={{
+    position: 'absolute',
+    bottom: 95,
+    right: 24,
+
+    backgroundColor: '#208AEF',
+
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    shadowColor: '#208AEF',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+
+    elevation: 12,
+    zIndex: 999,
+  }}
+>
+  <FontAwesome
+    name="plus"
+    size={28}
+    color="white"
+  />
+</TouchableOpacity>
+
+{/* Bottom Footer */}
+<View
+  style={{
+    position: 'absolute',
+    bottom: 18,
+    left: 18,
+    right: 18,
+    height: 76,
+    borderRadius: 28,
+    backgroundColor: theme.card,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 8,
+  }}
+>
+  <TouchableOpacity 
+     style={{
+      flex: 1,
+      alignItems: 'center',
+    }}
+  >
+    <FontAwesome name="home" size={25} color="#208AEF" />
+    <Text style={{ color: '#208AEF', fontSize: 12, fontWeight: '800', marginTop: 4 }}>
+      Home
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => router.push('/statistics')}
+     style={{
+    flex: 1,
+    alignItems: 'center',
+  }}
+  >
+    <FontAwesome name="bar-chart" size={24} color={theme.icon} />
+    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
+      Stats
+    </Text>
+  </TouchableOpacity>
+
+
+  <TouchableOpacity
+    onPress={() => router.push('/calendar')}
+    style={{ alignItems: 'center', flex: 1 }}
+  >
+    <FontAwesome name="calendar" size={24} color={theme.icon} />
+    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
+      Calendar
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => router.push('/settings')}
+    style={{ alignItems: 'center', flex: 1 }}
+  >
+    <FontAwesome name="cog" size={25} color={theme.icon} />
+    <Text style={{ color: theme.icon, fontSize: 12, fontWeight: '800', marginTop: 4 }}>
+      Settings
+    </Text>
+  </TouchableOpacity>
+</View>
 
       {/*Search Modal*/ } 
       <Modal
