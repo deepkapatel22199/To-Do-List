@@ -24,36 +24,38 @@ type Task = {
   subTasks: SubTask[];
 };
 
+let splashShownThisSession = false;
+
 export default function Index() {
   const { isDarkMode, setIsDarkMode, theme } = useTheme();
-  const [showSplash, setShowSplash] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[] | null>(null);
 
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
   const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Priority' | 'Due Date' >('Newest');
   const [sortDropdownVisible, setSortDropdownVisible] = useState(false);
-
+  const [checkingAppStart, setCheckingAppStart] = useState(true);
+  const [tasksLoaded, setTasksLoaded] = useState(false);
 
   const loadTasks = async () => {
   const savedTasks = await AsyncStorage.getItem('tasks');
-   const loadedTasks: Task[] = savedTasks
-    ? JSON.parse(savedTasks)
-    : [];
+
+  const loadedTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
 
   loadedTasks.sort((a, b) => {
     if (a.completed === b.completed) return 0;
-
     return a.completed ? 1 : -1;
   });
 
   setTasks(loadedTasks);
-  };
+  setTasksLoaded(true);
+};
+
 
   const toggleCompleteTask = async (id: string) => {
+  if (!tasks) return;
+
   const updatedTasks = tasks.map((task) =>
     task.id === id
       ? { ...task, completed: !task.completed }
@@ -77,86 +79,20 @@ useFocusEffect(
     loadTasks();
   }, [])
 );
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setShowSplash(false);
-  //   }, 500);
-  // }, []);
-
-  useEffect(() => {
-  const checkOnboardingStatus = async () => {
-    const onboardingSeen = await AsyncStorage.getItem('onboardingSeen');
-
-    if (onboardingSeen === 'true') {
-      setShowOnboarding(false);
-    } else {
-      setShowOnboarding(true);
+useEffect(() => {
+  const checkAppStart = async () => {
+    if (!splashShownThisSession) {
+      splashShownThisSession = true;
+      router.replace('/splash');
+      return;
     }
 
-    setCheckingOnboarding(false);
+    setCheckingAppStart(false);
   };
 
-  checkOnboardingStatus();
+  checkAppStart();
 }, []);
 
-  if (showSplash || checkingOnboarding) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: '#208AEF',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Image
-          source={require('../../assets/images/splash-icon.png')}
-          style={{
-            width: 150,
-            height: 150,
-            marginBottom: 20,
-          }}
-        />
-        <Text style={{ fontSize: 36, fontWeight: 'bold', color: 'white' }}>
-          NextTask
-        </Text>
-        <Text style={{ fontSize: 16, color: 'white', marginTop: 10 }}>
-          Make your daily tasks easier
-        </Text>
-        <ActivityIndicator color="white" style={{ marginTop: 25 }} />
-      </View>
-    );
-  }
-
-  if (showOnboarding) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-        <Image
-          source={require('../../assets/images/splash-icon.png')}
-          style={{ width: 160, height: 160, marginBottom: 30 }}
-        />
-
-        <Text style={{ fontSize: 30, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
-          Manage Your Tasks Easily
-        </Text>
-
-        <Text style={{ fontSize: 16, textAlign: 'center', color: '#666', marginBottom: 40 }}>
-          Add, edit, complete, and organize your daily tasks in one simple app.
-        </Text>
-
-        <TouchableOpacity
-           onPress={async () => {
-            await AsyncStorage.setItem('onboardingSeen', 'true');
-            setShowOnboarding(false);
-        }}
-          style={{ backgroundColor: '#208AEF', paddingVertical: 15, paddingHorizontal: 50, borderRadius: 12 }}
-        >
-          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Get Started</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   const formatDueDate = (date: string) => {
   if (!date) return 'No due date';
@@ -229,7 +165,6 @@ const isTomorrow = (date: Date) => {
   );
 };
 
-  
 
 
   const renderTaskItem = ({ item }: { item: Task }) => {
@@ -332,7 +267,7 @@ const isTomorrow = (date: Date) => {
   return 1;
 };
 
-const displayedTasks = [...tasks]
+const displayedTasks = [...(tasks ?? [])]
   .filter((task) => {
     if (filter === 'Pending') return !task.completed;
     if (filter === 'Completed') return task.completed;
@@ -422,23 +357,32 @@ const firstVisibleSection = taskSections.find(
   (section) => groupedTasks[section].length > 0
 );
 
-  const filteredTasks = tasks.filter(
-  (task) =>
-    task.title
-      .toLowerCase()
-      .includes(searchText.toLowerCase()) ||
-    task.description
-      .toLowerCase()
-      .includes(searchText.toLowerCase())
+  const safeTasks = tasks ?? [];
+  const filteredTasks = safeTasks.filter(
+    (task) =>
+      task.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchText.toLowerCase())
   );
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((task) => task.completed).length;
-  const pendingTasks = tasks.filter((task) => !task.completed).length;
+  const totalTasks = safeTasks.length;
+  const completedTasks = safeTasks.filter((task) => task.completed).length;
+  const pendingTasks = safeTasks.filter((task) => !task.completed).length;
 
   const progressPercentage =
   totalTasks === 0
     ? 0
     : Math.round((completedTasks / totalTasks) * 100);
+
+    if (checkingAppStart || !tasksLoaded) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.background,
+      }}
+    />
+  );
+}
+
   return (
     <View 
       style={{
@@ -492,7 +436,7 @@ const firstVisibleSection = taskSections.find(
 </TouchableOpacity>
 </View>
       </View> 
-      {tasks.length === 0 ? (
+      {tasks === null ? null : tasks.length === 0 ? (
         <View
   style={{
     flex: 1,

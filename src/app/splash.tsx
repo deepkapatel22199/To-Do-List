@@ -13,7 +13,7 @@ export default function Splash() {
       } else {
         router.replace('/onBoarding');
       }
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
