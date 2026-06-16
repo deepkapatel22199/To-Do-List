@@ -751,8 +751,8 @@ const displayedTasks = [...tasks]
     <Image
       source={require('../../assets/images/Target.png')}
       style={{
-        width: 95,
-        height: 95,
+        width: 101,
+        height: 101,
         resizeMode: 'contain',
       }}
     />
@@ -768,14 +768,26 @@ const displayedTasks = [...tasks]
     }}
   >
     <View
-      style={{
-        width: `${Math.max(progressPercentage),2}%`,
-        height: '100%',
-        backgroundColor: '#208AEF',
-        borderRadius: 999,
-      }}
-    />
-  </View>
+  style={{
+    height: 10,
+    backgroundColor: isDarkMode ? '#334155' : '#E5E7EB',
+    borderRadius: 999,
+    overflow:'hidden',
+  }}
+>
+  <View
+    style={{
+      width:
+        progressPercentage === 0
+          ? '0%'
+          : `${Math.max(progressPercentage, 3)}%`,
+      height: '100%',
+      backgroundColor: '#208AEF',
+      borderRadius: 999,
+    }}
+  />
+</View>
+</View>
 </View>
   <View
     style={{
