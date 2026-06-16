@@ -207,6 +207,18 @@ useFocusEffect(
   });
 };
 
+  const isTaskOverdue = (date: string, completed: boolean) => {
+  if (!date || completed) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const due = new Date(date);
+  due.setHours(0, 0, 0, 0);
+
+  return due < today;
+};
+
 const getPriorityStyle = (priority: string) => {
   if (priority === 'High') {
     return {
@@ -233,6 +245,9 @@ const getPriorityStyle = (priority: string) => {
 
   const renderTaskItem = ({ item }: { item: Task }) => {
     const priorityStyle = getPriorityStyle(item.priority);
+    const overdue = isTaskOverdue(item.dueDate, item.completed);
+
+
     return (
       <View
         style={{
@@ -359,6 +374,32 @@ const getPriorityStyle = (priority: string) => {
         marginTop: 14,
       }}
     > 
+    {/* Overdue Badge */}
+      {overdue && (
+  <View
+    style={{
+          backgroundColor: '#FEE2E2',
+          paddingVertical: 7,
+          paddingHorizontal: 12,
+          borderRadius: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginRight: 10,
+        }}
+  >
+    <FontAwesome name="exclamation-circle" size={14} color="#DC2626" />
+    <Text
+      style={{
+        color: '#B91C1C',
+        fontWeight: '900',
+        fontSize: 12,
+        marginLeft: 6,
+      }}
+    >
+      OVERDUE
+    </Text>
+  </View>
+)}
        
         {/* Status Badge */ }
       <View
