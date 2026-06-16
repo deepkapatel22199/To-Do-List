@@ -7,11 +7,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type SubTask = {
-  id: string;
-  text: string;
-  completed: boolean;
-};
 
 type Task = {
   id: string;
@@ -19,8 +14,9 @@ type Task = {
   description: string;
   priority: string;
   dueDate: string;
+  time: string;
+  category: string;
   completed: boolean;
-  subTasks: SubTask[];
 };
 
 export default function AddTask() {
@@ -28,10 +24,10 @@ export default function AddTask() {
   const [priority, setPriority] = useState('Medium');
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [checklistText, setChecklistText] = useState('');
-  const [subTasks, setSubTasks] = useState<SubTask[]>([]);
+  const [category, setCategory] = useState('Work');
 
   const { id } = useLocalSearchParams();
   
@@ -50,26 +46,17 @@ export default function AddTask() {
       setDescription(selectedTask.description);
       setPriority(selectedTask.priority);
       setDueDate(new Date(selectedTask.dueDate));
-      setSubTasks(selectedTask.subTasks || []);
+      setCategory(selectedTask.category || 'Work');
+      if (selectedTask.dueDate) {
+        setDueDate(new Date(selectedTask.dueDate));
+      }
     }
   };
 
   loadTaskForEdit();
 }, [id]);
 
-  const addChecklistItem = () => {
-  if (checklistText.trim() === '') return;
-
-  const newSubTask: SubTask = {
-    id: Date.now().toString(),
-    text: checklistText.trim(),
-    completed: false,
-  };
-
-  setSubTasks([...subTasks, newSubTask]);
-  setChecklistText('');
-};
-
+ 
   const handleAddTask = async () => {
   if (title.trim() === '') {
     alert('Please enter task title');
@@ -88,8 +75,12 @@ export default function AddTask() {
             description: description.trim(),
             priority,
             dueDate: dueDate.toISOString(),
-            completed: false,
-            subTasks,
+            time: dueDate.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          category,
+          completed: task.completed,
           }
         : task
     );
@@ -102,8 +93,12 @@ export default function AddTask() {
       description: description.trim(),
       priority,
       dueDate: dueDate.toISOString(),
-      completed: false,
-      subTasks,
+      time: dueDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    category,
+    completed: false,
     };
 
     await AsyncStorage.setItem('tasks', JSON.stringify([...oldTasks, newTask]));
@@ -137,6 +132,22 @@ export default function AddTask() {
     icon: '#22C55E',
   };
 };
+
+  
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    };
+
+    const formatTime = (date: Date) => {
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    };
 
   return (
     <SafeAreaView
@@ -228,227 +239,332 @@ export default function AddTask() {
       </View>
     </View>
             {/*Form Card */ }
-      <View
-        style={{
-          backgroundColor: theme.card,
-          marginHorizontal: 20,
-          marginTop: 24,
-          padding: 22,
-          borderRadius: 26,
-          elevation: 6,
-          shadowColor: '#000',
-          shadowOpacity: 0.08,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: 6 },
-          borderWidth: 1,
-          borderColor: isDarkMode ? '#263445' : '#E5E7EB',
-        }}
-      >
-        <TextInput
-        placeholder="Enter Task Title"
-        placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
-        value={title}
-        onChangeText={setTitle}
-        style={{
-          backgroundColor: theme.inputBackground, 
-          color: theme.text,
-          borderRadius: 16,
-          padding: 16,
-          marginBottom: 16,
-          borderWidth: 1,
-          borderColor: isDarkMode ? '#334155' : '#E5E7EB' ,
-          fontSize: 17,
-          fontWeight: '600',
-        }}
-      />
-
-      <TextInput
-        placeholder="Enter Task Description"
-        placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        style={{
-          backgroundColor: theme.inputBackground,
-          borderRadius: 16,
-          padding: 16,
-          marginBottom: 16,
-          height: 130,
-          borderWidth: 1,
-          borderColor: isDarkMode ? '#334155' : '#E5E7EB' ,
-          textAlignVertical: 'top',
-          color: theme.text,
-          fontSize: 16,
-          lineHeight: 22,
-        }}
-      />
-  {/*checkList UI*/}
-       <TextInput
-  placeholder="Enter Tasks ..."
-  placeholderTextColor={isDarkMode ? '#A0AEC0' : '#666'}
-  value={checklistText}
-  onChangeText={setChecklistText}
-  onSubmitEditing={addChecklistItem}
-  returnKeyType="done"
+     {/* Form Content */}
+<View
   style={{
-    backgroundColor: theme.inputBackground,
-    color: theme.text,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: isDarkMode ? '#334155' : '#E5E7EB',
-    fontSize: 16,
-    marginBottom: 12,
+    marginHorizontal: 20,
+    marginTop: 24,
   }}
-/>
-
-{subTasks.map((item) => (
+>
+  {/* Task Title */}
   <View
-    key={item.id}
     style={{
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 10,
-      backgroundColor: isDarkMode ? '#111827' : '#F8FAFC',
-      padding: 12,
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: isDarkMode ? '#263445' : '#E5E7EB',
     }}
   >
-    <FontAwesome name="circle-o" size={17} color={theme.subText} />
-
-    <Text style={{ color: theme.text, marginLeft: 10, fontSize: 15, flex: 1 }}>
-      {item.text}
-    </Text>
-  </View>
-))}
-      {/*Priority Section*/ }
-      <Text 
-        style={{ 
-          color: theme.text, 
-          fontWeight: '800', 
-          marginBottom: 12 , 
-          fontSize: 16
-          }} 
-        >
-          Priority
-      </Text>
-
-      <View style={{ marginBottom: 22 }}>
-  {['Low', 'Medium', 'High'].map((item) => {
-     const colors = getPriorityColors(item);
-    const selected = priority === item;
-    return(
-    <TouchableOpacity
-      key={item}
-      onPress={() => setPriority(item)}
+    <FontAwesome name="pencil-square-o" size={22} color="#208AEF" />
+    <TextInput
+      placeholder="Task Title"
+      placeholderTextColor={isDarkMode ? '#A0AEC0' : '#7C8596'}
+      value={title}
+      onChangeText={setTitle}
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: selected ? colors.bg : theme.inputBackground,
-        padding: 15,
-        borderRadius: 16,
-        marginBottom: 10,
-        borderWidth: 1.5,
-        borderColor: selected ? colors.border : isDarkMode ? '#334155' : '#E5E7EB',
+        flex: 1,
+        color: theme.text,
+        fontSize: 17,
+        marginLeft: 14,
+        fontWeight: '600',
       }}
-    >
-      <FontAwesome
-        name={selected ? 'check-circle' : 'square-o'}
-        size={22}
-        color={selected ? colors.icon : theme.subText}
-      />
+    />
+  </View>
 
-      <Text
-        style={{
-          color: selected ? colors.text : theme.text,
-          fontWeight: '800',
-          fontSize: 16,
-          marginLeft: 12,
-        }}
-      >
-        {item === 'Low' 
-        ? '🟢 Low Priority' : 
-        item === 'Medium' ? 
-        '🟡 Medium Priority' : 
-        '🔴 High Priority'}
+  {/* Description */}
+  <View
+    style={{
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      minHeight: 105,
+    }}
+  >
+    <FontAwesome name="file-text-o" size={22} color="#208AEF" style={{ marginTop: 4 }} />
+    <TextInput
+      placeholder="Description (optional)"
+      placeholderTextColor={isDarkMode ? '#A0AEC0' : '#7C8596'}
+      value={description}
+      onChangeText={setDescription}
+      multiline
+      style={{
+        flex: 1,
+        color: theme.text,
+        fontSize: 16,
+        marginLeft: 14,
+        textAlignVertical: 'top',
+        lineHeight: 22,
+      }}
+    />
+  </View>
+    
+
+  {/* Priority */}
+  <TouchableOpacity
+    style={{
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <FontAwesome name="flag" size={22} color="#EF4444" />
+      <Text style={{ color: theme.text, fontSize: 17, fontWeight: '800', marginLeft: 14 }}>
+        Priority
       </Text>
-    </TouchableOpacity>
-    );
-})}
-</View>
-      
-      {/* Date Picker */}
-      <Text
-        style={{ color: theme.text, fontWeight: 'bold', marginBottom: 8 , fontSize: 16}} >
+    </View>
+
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      {['Low', 'Medium', 'High'].map((item) => (
+        <TouchableOpacity
+          key={item}
+          onPress={() => setPriority(item)}
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 14,
+            marginLeft: 6,
+            backgroundColor: priority === item ? getPriorityColors(item).bg : 'transparent',
+          }}
+        >
+          <Text
+            style={{
+              color: priority === item ? getPriorityColors(item).text : theme.subText,
+              fontWeight: '800',
+              fontSize: 13,
+            }}
+          >
+            {item}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </TouchableOpacity>
+
+  {/* Due Date */}
+  <TouchableOpacity
+    onPress={() => setShowDatePicker(true)}
+    style={{
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <FontAwesome name="calendar" size={22} color="#208AEF" />
+      <Text style={{ color: theme.text, fontSize: 17, fontWeight: '800', marginLeft: 14 }}>
         Due Date
       </Text>
+    </View>
 
-      <TouchableOpacity
-        onPress={() => setShowDatePicker(true)}
-        style={{
-          backgroundColor: theme.inputBackground,
-          borderRadius: 14,
-          padding: 16,
-          marginBottom: 24,
-          borderWidth: 1,
-          borderColor: isDarkMode ? '#334155' : '#E5E7EB',
-          flexDirection: 'row',
-            alignItems: 'center',
-        }}
-      >
-      <FontAwesome name="calendar" size={18} color={theme.text} />
-      <Text style={{ color: theme.text, marginLeft: 12,   fontSize: 16 }}>
-        {dueDate.toLocaleDateString()}
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700', marginRight: 10 }}>
+        {formatDate(dueDate)}
       </Text>
-    </TouchableOpacity>
+      <FontAwesome name="chevron-down" size={14} color={theme.subText} />
+    </View>
+  </TouchableOpacity>
 
-    {showDatePicker && (
-      <DateTimePicker
-        value={dueDate}
-        mode="date"
-        display="default"
-        onValueChange={(event, selectedDate) => {
+  {showDatePicker && (
+    <DateTimePicker
+      value={dueDate}
+      mode="date"
+      display="default"
+      onChange={(event, selectedDate) => {
         setShowDatePicker(false);
         if (selectedDate) {
           setDueDate(selectedDate);
+        }
+      }}
+    />
+  )}
+  {/* Time Block */}
+  <TouchableOpacity
+  onPress={() => setShowTimePicker(true)}
+  style={{
+    backgroundColor: theme.card,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}
+>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <FontAwesome name="clock-o" size={22} color="#208AEF" />
+    <Text style={{ color: theme.text, fontSize: 17, fontWeight: '800', marginLeft: 14 }}>
+      Time
+    </Text>
+  </View>
+
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700', marginRight: 10 }}>
+      {formatTime(dueDate)}
+    </Text>
+    <FontAwesome name="chevron-down" size={14} color={theme.subText} />
+  </View>
+</TouchableOpacity>
+
+{showTimePicker && (
+  <DateTimePicker
+    value={dueDate}
+    mode="time"
+    display="default"
+    onChange={(event, selectedTime) => {
+      setShowTimePicker(false);
+      if (selectedTime) {
+        const updatedDate = new Date(dueDate);
+        updatedDate.setHours(selectedTime.getHours());
+        updatedDate.setMinutes(selectedTime.getMinutes());
+        setDueDate(updatedDate);
       }
     }}
   />
 )}
+  {/* Categary Block */}
 
-      {/* Save Button */}
+  <View
+  style={{
+    backgroundColor: theme.card,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+  }}
+>
+  <View
+    style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <FontAwesome name="tag" size={22} color="#6D5DF6" />
+      <Text style={{ color: theme.text, fontSize: 17, fontWeight: '800', marginLeft: 14 }}>
+        Category
+      </Text>
+    </View>
 
+    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>
+      {category}
+    </Text>
+  </View>
+
+  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+    {['Work', 'Personal', 'Study', 'Shopping'].map((item) => (
       <TouchableOpacity
-        onPress={handleAddTask}
+        key={item}
+        onPress={() => setCategory(item)}
         style={{
-          backgroundColor: '#208AEF',
-          padding: 17,
-          borderRadius: 18,
-          alignItems: 'center',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          shadowColor: '#208AEF',
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          shadowOffset: { width: 0, height: 5 },
-          elevation: 6,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          borderRadius: 16,
+          marginRight: 8,
+          marginBottom: 8,
+          backgroundColor: category === item ? '#E3F2FD' : theme.background,
+          borderWidth: 1,
+          borderColor: category === item ? '#208AEF' : isDarkMode ? '#334155' : '#E5E7EB',
         }}
       >
-
-        <FontAwesome
-          name={id ? 'save' : 'plus'}
-          size={17}
-          color="white"
-          style={{ marginRight: 8 }}
-        />
-        <Text style={{ color: 'white', textAlign: 'center', fontWeight: '900', fontSize: 16 }}>
-          {id ? 'Update Task' : 'Add Task'}
+        <Text
+          style={{
+            color: category === item ? '#208AEF' : theme.text,
+            fontWeight: '800',
+            fontSize: 13,
+          }}
+        >
+          {item}
         </Text>
       </TouchableOpacity>
- 
-      </View>
+    ))}
+  </View>
+</View>
+
+
+  {/* Reminder Placeholder */}
+  <View
+    style={{
+      backgroundColor: theme.card,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 28,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#334155' : '#E5E7EB',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <FontAwesome name="bell-o" size={22} color="#208AEF" />
+      <Text style={{ color: theme.text, fontSize: 17, fontWeight: '800', marginLeft: 14 }}>
+        Reminder
+      </Text>
+    </View>
+
+    <Text style={{ color: theme.subText, fontSize: 16, fontWeight: '700' }}>
+      None
+    </Text>
+  </View>
+
+  {/* Save Button */}
+  <TouchableOpacity
+    onPress={handleAddTask}
+    style={{
+      backgroundColor: '#005BFF',
+      padding: 18,
+      borderRadius: 18,
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      shadowColor: '#005BFF',
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 5 },
+      elevation: 6,
+      marginBottom: 30,
+    }}
+  >
+    <FontAwesome
+      name={id ? 'save' : 'plus-circle'}
+      size={22}
+      color="white"
+      style={{ marginRight: 10 }}
+    />
+    <Text style={{ color: 'white', textAlign: 'center', fontWeight: '900', fontSize: 17 }}>
+      {id ? 'Update Task' : 'Add Task'}
+    </Text>
+  </TouchableOpacity>
+</View>
       </ScrollView>
          </SafeAreaView>
   );
