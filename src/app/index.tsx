@@ -509,6 +509,11 @@ const displayedTasks = [...tasks]
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const pendingTasks = tasks.filter((task) => !task.completed).length;
+
+  const progressPercentage =
+  totalTasks === 0
+    ? 0
+    : Math.round((completedTasks / totalTasks) * 100);
   return (
     <View 
       style={{
@@ -683,6 +688,95 @@ const displayedTasks = [...tasks]
 </View>
       ) : (
       <View style={{ flex: 1 }}>
+        {/* Progress Card */}
+<View
+  style={{
+    backgroundColor: theme.card,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 16,
+    padding: 18,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 4,
+  }}
+>
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}
+  >
+    <View style={{ flex: 1 }}>
+      <Text
+        style={{
+          color: theme.text,
+          fontSize: 15,
+          fontWeight: '900',
+          marginBottom: 8,
+        }}
+      >
+        Today's Progress
+      </Text>
+
+      <Text
+        style={{
+          color: '#208AEF',
+          fontSize: 34,
+          fontWeight: '900',
+          marginBottom: 2,
+        }}
+      >
+        {progressPercentage}%
+      </Text>
+
+      <Text
+        style={{
+          color: theme.subText,
+          fontSize: 13,
+          fontWeight: '600',
+          marginBottom: 14,
+        }}
+      >
+        {completedTasks} of {totalTasks} tasks completed
+      </Text>
+    </View>
+
+    <Image
+      source={require('../../assets/images/Target.png')}
+      style={{
+        width: 95,
+        height: 95,
+        resizeMode: 'contain',
+      }}
+    />
+  </View>
+
+  <View
+    style={{
+      height: 10,
+      backgroundColor: isDarkMode ? '#334155' : '#E5E7EB',
+      borderRadius: 999,
+      overflow: 'hidden',
+      marginTop: 4,
+    }}
+  >
+    <View
+      style={{
+        width: `${Math.max(progressPercentage),2}%`,
+        height: '100%',
+        backgroundColor: '#208AEF',
+        borderRadius: 999,
+      }}
+    />
+  </View>
+</View>
   <View
     style={{
       flexDirection: 'row',
