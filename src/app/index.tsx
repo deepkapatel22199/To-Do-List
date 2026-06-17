@@ -6,6 +6,8 @@ import { View, Text, ActivityIndicator, Image , TouchableOpacity,  Alert, Scroll
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNav from './bottomNav';
 import SearchModal from './searchModel';
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
 
 type SubTask = {
   id: string;
@@ -28,8 +30,7 @@ let splashShownThisSession = false;
 
 export default function Index() {
   const { isDarkMode, setIsDarkMode, theme } = useTheme();
-  const [tasks, setTasks] = useState<Task[] | null>(null);
-
+  const [tasks, setTasks] = useState<Task[] >([]);
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Completed'>('All');
@@ -39,19 +40,23 @@ export default function Index() {
   const [tasksLoaded, setTasksLoaded] = useState(false);
 
   const loadTasks = async () => {
-  const savedTasks = await AsyncStorage.getItem('tasks');
+  try {
+    const savedTasks = await AsyncStorage.getItem('tasks');
 
-  const loadedTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : [];
-
-  loadedTasks.sort((a, b) => {
-    if (a.completed === b.completed) return 0;
-    return a.completed ? 1 : -1;
-  });
-
-  setTasks(loadedTasks);
-  setTasksLoaded(true);
+    if (savedTasks) {
+      const parsedTasks = JSON.parse(savedTasks);
+      setTasks(parsedTasks);
+    } else {
+      setTasks([]);
+    }
+  } catch (error) {
+    console.log('Error loading tasks:', error);
+    setTasks([]);
+  } finally {
+    setTasksLoaded(true);
+    await SplashScreen.hideAsync();
+  }
 };
-
 
   const toggleCompleteTask = async (id: string) => {
   if (!tasks) return;
@@ -372,17 +377,9 @@ const firstVisibleSection = taskSections.find(
     ? 0
     : Math.round((completedTasks / totalTasks) * 100);
 
-    if (checkingAppStart || !tasksLoaded) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.background,
-      }}
-    />
-  );
+    if (!tasksLoaded) {
+  return null;
 }
-
   return (
     <View 
       style={{
@@ -436,7 +433,7 @@ const firstVisibleSection = taskSections.find(
 </TouchableOpacity>
 </View>
       </View> 
-      {tasks === null ? null : tasks.length === 0 ? (
+      {tasks.length === 0 ? (
         <View
   style={{
     flex: 1,
@@ -452,7 +449,6 @@ const firstVisibleSection = taskSections.find(
       padding: 30,
       borderRadius: 24,
       alignItems: 'center',
-
       shadowColor: '#000',
       shadowOpacity: 0.08,
       shadowRadius: 10,
@@ -464,35 +460,48 @@ const firstVisibleSection = taskSections.find(
       elevation: 5,
     }}
   >
-    {/* Icon Circle */}
-    <View
-      style={{
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        backgroundColor: '#E3F2FD',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-      }}
-    >
-      <FontAwesome
-        name="tasks"
-        size={40}
-        color="#208AEF"
-      />
-    </View>
-
+   
     {/* Title */}
+    {filteredTasks.length === 0 && (
+  <View
+    style={{
+    alignItems: 'center', 
+    paddingHorizontal: 24,
+  }}
+  >
+    
+    <Image
+      source={require('../../assets/images/Target.png')}
+      style={{
+        width: 150,
+        height: 150,
+        resizeMode: 'contain',
+      }}
+    />
     <Text
       style={{
-        fontSize: 28,
-        fontWeight: 'bold',
         color: theme.text,
+        fontSize: 22,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 8,
       }}
     >
-      No Tasks Yet
+      Ready to get productive?
     </Text>
+
+    <Text
+      style={{
+        color: theme.subText,
+        fontSize: 15,
+        textAlign: 'center',
+        lineHeight: 22,
+      }}
+    >
+      Tap + to create your first task.
+    </Text>
+  </View>
+)}
 
     {/* Subtitle */}
     <Text
@@ -500,7 +509,7 @@ const firstVisibleSection = taskSections.find(
         fontSize: 16,
         color: theme.subText,
         textAlign: 'center',
-        marginTop: 10,
+        marginTop: 20,
         lineHeight: 24,
       }}
     >
