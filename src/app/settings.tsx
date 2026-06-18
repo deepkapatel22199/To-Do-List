@@ -52,69 +52,6 @@ export default function Settings() {
             <Switch value={isDarkMode} onValueChange={setIsDarkMode} />
           </SettingRow>
 
-          <SettingRow
-            icon="bell-o"
-            title="Notifications"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('Coming Soon', 'Notifications will be added soon.')}
-          />
-
-          <SettingRow
-            icon="th-large"
-            title="Default View"
-            value="Week"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('Default View', 'Default view setting will be added soon.')}
-          />
-        </View>
-
-        <Text style={{ color: theme.subText, fontSize: 14, fontWeight: '800', marginBottom: 8 }}>
-          About
-        </Text>
-
-        <View
-          style={{
-            backgroundColor: theme.card,
-            borderRadius: 18,
-            borderWidth: 1,
-            borderColor: isDarkMode ? '#334155' : '#E5E7EB',
-            overflow: 'hidden',
-          }}
-        >
-          <SettingRow
-            icon="star-o"
-            title="Rate NextTask"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('Rate NextTask', 'This will open Play Store after publishing.')}
-          />
-
-          <SettingRow
-            icon="share-alt"
-            title="Share NextTask"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('Share NextTask', 'Share option will be added soon.')}
-          />
-
-          <SettingRow
-            icon="shield"
-            title="Privacy Policy"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('Privacy Policy', 'Add your privacy policy link here.')}
-          />
-
-          <SettingRow
-            icon="info-circle"
-            title="About App"
-            value="v1.0.0"
-            color="#64748B"
-            theme={theme}
-            onPress={() => Alert.alert('NextTask', 'Version 1.0.0')}
-          />
         </View>
       </ScrollView>
       <BottomNav active="Settings" />
