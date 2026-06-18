@@ -63,7 +63,10 @@ export default function Index() {
 
   const updatedTasks = tasks.map((task) =>
     task.id === id
-      ? { ...task, completed: !task.completed }
+      ? { ...task, 
+        completed: !task.completed,
+        completedAt: !task.completed ? new Date().toISOString() : undefined,
+      }
       : task
   );
 
@@ -654,70 +657,183 @@ const firstVisibleSection = taskSections.find(
 </View>
     {/*---------------------- counter --------------------------*/}
   <View
+  style={{
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 14,
+  }}
+>
+  {/* Total */}
+  <View
     style={{
-      flexDirection: 'row',
-      marginHorizontal: 20,
-      marginTop: 20,
-      marginBottom: 18,
+      flex: 1,
+      backgroundColor: theme.card,
+      padding: 14,
+      borderRadius: 18,
+      marginRight: 10,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#263445' : '#E5E7EB',
     }}
   >
     <View
       style={{
-        flex: 1,
-        backgroundColor: theme.card,
-        paddingVertical: 16,
-        borderRadius: 18,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginRight: 10,
-        borderWidth: 1,
-        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+        marginBottom: 8,
+      }}
+    ><View
+      style={{
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
       }}
     >
-     
-      <Text style={{ color: theme.text, fontSize: 24, fontWeight: '900' }}>
+      <Text
+        style={{
+          color: theme.text,
+          fontSize: 26,
+          fontWeight: '900',
+        }}
+      >
         {totalTasks}
       </Text>
-       <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Total</Text>
+        <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '800' }}>
+      Total
+    </Text>
+    </View>
+      <View
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 124,
+          backgroundColor: '#208AEF20',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <FontAwesome name="list" size={24} color="#208AEF" />
+      </View>
     </View>
 
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.card,
-        paddingVertical: 16,
-        borderRadius: 18,
-        alignItems: 'center',
-        marginRight: 10,
-        borderWidth: 1,
-        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
-      }}
-    >
-      
-      <Text style={{ color: '#F9A825', fontSize: 24, fontWeight: '900' }}>
-        {pendingTasks}
-      </Text>
-      <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Pending</Text>
-    </View>
-
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.card,
-        paddingVertical: 16,
-        borderRadius: 18,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: isDarkMode ? '#263445' : '#E5E7EB',
-      }}
-    >
-      
-      <Text style={{ color: '#2E7D32', fontSize: 24, fontWeight: '900' }}>
-        {completedTasks}
-      </Text>
-      <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '700' }}>Done</Text>
-    </View>
+    
   </View>
 
+  {/* Pending */}
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: theme.card,
+      padding: 14,
+      borderRadius: 18,
+      marginRight: 10,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+    }}
+  >
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+      }}
+    >
+      <View
+      style={{
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      <Text
+        style={{
+          color: '#F9A825',
+          fontSize: 26,
+          fontWeight: '900',
+        }}
+      >
+        {pendingTasks}
+      </Text>
+      <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '800' }}>
+      Pending
+    </Text>
+        </View>
+      <View
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 24,
+          backgroundColor: '#F9A82520',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <FontAwesome name="clock-o" size={24} color="#F9A825" />
+      </View>
+    </View>
+
+    
+  </View>
+
+  {/* Done */}
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: theme.card,
+      padding: 14,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#263445' : '#E5E7EB',
+    }}
+  >
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+      }}
+    >
+      <View
+        style={{
+          flexDirection:'column',
+          justifyContent:'center',
+          alignItems:'center'
+
+        }}
+      >
+      <Text
+        style={{
+          color: '#2E7D32',
+          fontSize: 26,
+          fontWeight: '900',
+        }}
+      >
+        {completedTasks}
+      </Text>
+        <Text style={{ color: theme.subText, fontSize: 13, fontWeight: '800' }}>
+      Done
+    </Text>
+    </View>
+      <View
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 24,
+          backgroundColor: '#2E7D3220',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <FontAwesome name="check-circle" size={24} color="#2E7D32" />
+      </View>
+    </View>
+
+    
+  </View>
+</View>
       {/*------------------------------------- filter All , pending , completed ---------------------------------------*/}
   <View
   style={{

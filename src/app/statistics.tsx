@@ -49,36 +49,70 @@ export default function Statistics() {
 
   const productivityScore = completionRate;
 
-    const calculateStreak = () => {
-  const completedDates = tasks
-    .filter((task) => task.completed)
-    .map((task) => {
-      const date = task.completedAt ? new Date(task.completedAt) : new Date(task.dueDate);
+// CHANGE HERE: New streak logic
+const calculateStreaks = () => {
+  const completedDates = [
+    ...new Set(
+      tasks
+        .filter((task) => task.completed && task.completedAt)
+        .map((task) => {
+          const date = new Date(task.completedAt!);
+          return date.toDateString();
+        })
+    ),
+  ];
 
-      return date.toDateString();
-    });
+  if (completedDates.length === 0) {
+    return {
+      currentStreak: 0,
+      bestStreak: 0,
+    };
+  }
 
-  const uniqueDates = [...new Set(completedDates)];
+  const sortedDates = completedDates
+    .map((date) => new Date(date))
+    .sort((a, b) => a.getTime() - b.getTime());
 
-  let streak = 0;
+  let bestStreak = 1;
+  let tempStreak = 1;
+
+  for (let i = 1; i < sortedDates.length; i++) {
+    const previousDate = new Date(sortedDates[i - 1]);
+    const currentDate = new Date(sortedDates[i]);
+
+    previousDate.setDate(previousDate.getDate() + 1);
+
+    if (previousDate.toDateString() === currentDate.toDateString()) {
+      tempStreak++;
+      bestStreak = Math.max(bestStreak, tempStreak);
+    } else {
+      tempStreak = 1;
+    }
+  }
+
+  let currentStreak = 0;
   const today = new Date();
 
   for (let i = 0; i < 365; i++) {
     const checkDate = new Date();
     checkDate.setDate(today.getDate() - i);
 
-    if (uniqueDates.includes(checkDate.toDateString())) {
-      streak++;
+    const hasCompletedTask = completedDates.includes(checkDate.toDateString());
+
+    if (hasCompletedTask) {
+      currentStreak++;
     } else {
       break;
     }
   }
 
-  return streak;
+  return {
+    currentStreak,
+    bestStreak,
+  };
 };
 
-const currentStreak = calculateStreak();
-const bestStreak = currentStreak;
+const { currentStreak, bestStreak } = calculateStreaks();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -151,7 +185,7 @@ const bestStreak = currentStreak;
 
         {/* Stats Grid */}
         <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-          <StatBox title="Total Tasks" value={totalTasks} icon="calendar-plus-o" color="#208AEF" theme={theme} isDarkMode={isDarkMode} />
+          <StatBox title="Total Tasks" value={totalTasks} icon="list" color="#208AEF" theme={theme} isDarkMode={isDarkMode} />
           <StatBox title="Completed" value={completedTasks} icon="check-circle" color="#22C55E" theme={theme} isDarkMode={isDarkMode} />
         </View>
 

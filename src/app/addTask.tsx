@@ -392,7 +392,7 @@ export default function AddTask() {
       value={dueDate}
       mode="date"
       display="default"
-      onChange={(event, selectedDate) => {
+      onValueChange={(event, selectedDate) => {
         setShowDatePicker(false);
         if (selectedDate) {
           setDueDate(selectedDate);
