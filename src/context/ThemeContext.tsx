@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext,  useEffect, useContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext<any>(null);
 
@@ -7,7 +8,36 @@ export const ThemeProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkModeState] = useState(false);
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+
+  useEffect(() => {
+  const loadTheme = async () => {
+    try {
+      const savedTheme = await AsyncStorage.getItem('isDarkMode');
+
+      if (savedTheme !== null) {
+        setIsDarkModeState(savedTheme === 'true');
+      }
+    } catch (error) {
+      console.log('Error loading theme:', error);
+    } finally {
+      setThemeLoaded(true);
+    }
+  };
+
+  loadTheme();
+}, []);
+
+const setIsDarkMode = async (value: boolean) => {
+  try {
+    setIsDarkModeState(value);
+    await AsyncStorage.setItem('isDarkMode', value.toString());
+  } catch (error) {
+    console.log('Error saving theme:', error);
+  }
+};
 
   const theme = {
     background: isDarkMode ? '#121212' : '#F7F9FC',

@@ -73,7 +73,6 @@ function SettingRow({ icon, title, value, color, theme, children, onPress }: any
         alignItems: 'center',
         paddingVertical: 15,
         paddingHorizontal: 14,
-        borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
       }}
     >
