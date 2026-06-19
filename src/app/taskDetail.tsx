@@ -177,20 +177,17 @@ export default function TaskDetail() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-start',
           }}
         >
           <TouchableOpacity onPress={() => router.back()}>
             <FontAwesome name="chevron-left" size={22} color="white" />
           </TouchableOpacity>
 
-          <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>
+          <Text style={{ color: 'white', marginHorizontal: 10 , fontSize: 20, fontWeight: '900' }}>
             Task Detail
           </Text>
 
-          <TouchableOpacity onPress={() => router.push(`/addTask?id=${task.id}`)}>
-            <FontAwesome name="ellipsis-h" size={24} color="white" />
-          </TouchableOpacity>
         </View>
       </View>
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "NextTask : Prioritize Your Day",
     "slug": "TodoListApp",
-    "version": "2.0.0",
+    "version": "5.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon.png",
     "scheme": "nexttask",
